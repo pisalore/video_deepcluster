@@ -9,7 +9,6 @@
 
 import argparse
 import os
-import math
 import time
 import glob
 from collections import defaultdict
@@ -19,7 +18,6 @@ import torch
 import torch.nn as nn
 import torch.optim
 import torch.utils.data
-import torchvision
 import torchvision.transforms as transforms
 import torch.backends.cudnn as cudnn
 from sklearn import metrics
@@ -28,7 +26,6 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from util import AverageMeter, load_model
-from eval_linear import accuracy
 
 
 parser = argparse.ArgumentParser()
