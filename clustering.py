@@ -153,7 +153,7 @@ def run_kmeans(x, nmb_clusters, verbose=False):
         x: data
         nmb_clusters (int): number of clusters
     Returns:
-        list: ids of data in each cluster
+        (list: ids of data in each cluster, float: loss value)
     """
     n_data, d = x.shape
 
@@ -176,7 +176,14 @@ def run_kmeans(x, nmb_clusters, verbose=False):
     # perform the training
     clus.train(x, index)
     _, I = index.search(x, 1)
-    losses = faiss.vector_to_array(clus.obj)
+
+    # losses = faiss.vector_to_array(clus.obj)
+
+    stats = clus.iteration_stats
+    losses = np.array([
+        stats.at(i).obj for i in range(stats.size())
+    ])
+
     if verbose:
         print('k-means loss evolution: {0}'.format(losses))
 
