@@ -18,6 +18,7 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+from skimage import transform, io
 
 import clustering
 import models
