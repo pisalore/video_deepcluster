@@ -17,8 +17,9 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-from skimage import transform, io
+from torchvision import datasets
+
+from VidDataLoader import VidDataset
 
 import clustering
 import models
@@ -118,13 +119,15 @@ def main(args):
     # preprocessing of data
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-    tra = [transforms.Resize(256),
-           transforms.CenterCrop(224),
+    tra = [transforms.Resize(224),
            transforms.ToTensor(),
            normalize]
 
     # load the data
     end = time.time()
+    # TODO apply transformations
+    dataset = VidDataset(xml_annotations_dir='annotations', root_dir='trainset')
+
     dataset = datasets.ImageFolder(args.data, transform=transforms.Compose(tra))
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))
