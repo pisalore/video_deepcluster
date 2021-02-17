@@ -1,6 +1,7 @@
 import torch
 from skimage import transform
 import numpy as np
+from torchvision.transforms import transforms
 
 
 class Rescale(object):
@@ -41,9 +42,16 @@ class ToTensor(object):
     def __call__(self, sample):
         image, crop_coord = sample['image'], sample['crop_coord']
 
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
+
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
-        # image = image.transpose((2, 0, 1))
+        image = image.transpose((2, 0, 1))
+
         return {'image': torch.from_numpy(image),
                 'crop_coord': torch.from_numpy(crop_coord)}
+
+        # return {'image': normalize(torch.from_numpy(image)),
+        #         'crop_coord': torch.from_numpy(crop_coord)}
