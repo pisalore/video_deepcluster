@@ -17,7 +17,6 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-from torchvision import datasets
 
 import preprocessing
 from VidDataLoader import VidDataset

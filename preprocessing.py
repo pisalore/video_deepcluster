@@ -1,6 +1,5 @@
 import torch
 from skimage import transform
-import numpy as np
 from torchvision.transforms import transforms
 
 
