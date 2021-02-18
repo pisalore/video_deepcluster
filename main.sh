@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
-ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train"
+DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/ILSVRC2015_VID_train_0000"
+ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/ILSVRC2015_VID_train_0000"
 ARCH="alexnet"
 LR=0.05
 WD=-5
@@ -15,11 +15,10 @@ WORKERS=12
 EXP="/home/${USER}/test/exp"
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 EPOCHS=100
-
+BATCH=256
 mkdir -p ${EXP}
 
-CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --exp ${EXP} --arch ${ARCH} \
+CUDA_VISIBLE_DEVICES=1 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
   --lr ${LR} --wd ${WD} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
-
 

@@ -77,6 +77,7 @@ class VidDataset(Dataset):
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
 
         for img, ann in zip(self.images, self.annotations):
+            print(img)
             df_row = [img] + parse_annotation(ann)
             self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                                                    ignore_index=True)
