@@ -24,20 +24,28 @@ def list_files(root_path):
     return path_list
 
 
-def parse_annotation(ann):
+def parse_annotation(img, ann):
     """
     Args:
+        img (string): the image to which coordinates are related
         ann: an xml file with bb annotations: xmin, xmax, ymin, ymax
-
     Returns:
         a list with bb coordinates for a given image.
+    Exception:
+        if coordinates are not present in xml file.
     """
-    xml = minidom.parse(ann)
-    x_min, x_max, y_min, y_max = int(xml.getElementsByTagName('xmin')[0].firstChild.data), \
-                                 int(xml.getElementsByTagName('xmax')[0].firstChild.data), \
-                                 int(xml.getElementsByTagName('ymin')[0].firstChild.data), \
-                                 int(xml.getElementsByTagName('ymax')[0].firstChild.data)
-    return [x_min, x_max, y_min, y_max]
+    try:
+        xml = minidom.parse(ann)
+        x_min, x_max, y_min, y_max = int(xml.getElementsByTagName('xmin')[0].firstChild.data), \
+                                     int(xml.getElementsByTagName('xmax')[0].firstChild.data), \
+                                     int(xml.getElementsByTagName('ymin')[0].firstChild.data), \
+                                     int(xml.getElementsByTagName('ymax')[0].firstChild.data)
+        return [x_min, x_max, y_min, y_max]
+    except Exception as e:
+        print("Error:", e.__class__, "occurred for img " + img)
+        print("Next entry.")
+        print()
+        pass
 
 
 def crop(img_desc):
@@ -75,12 +83,14 @@ class VidDataset(Dataset):
         self.annotations = list_files(xml_annotations_dir)
         self.images = list_files(root_dir)
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
-
         for img, ann in zip(self.images, self.annotations):
             print(img)
-            df_row = [img] + parse_annotation(ann)
-            self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
+            img_coord = parse_annotation(img, ann)
+            if img_coord:
+                df_row = [img] + img_coord
+                self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                                                    ignore_index=True)
+
         self.root_dir = root_dir
         self.transform = transform
 
