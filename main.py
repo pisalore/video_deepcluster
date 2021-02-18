@@ -19,6 +19,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 from torchvision import datasets
 
+import preprocessing
 from VidDataLoader import VidDataset
 
 import clustering
@@ -30,6 +31,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of DeepCluster')
 
     parser.add_argument('data', metavar='DIR', help='path to dataset')
+    parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -85,7 +87,7 @@ def main(args):
         filter(lambda x: x.requires_grad, model.parameters()),
         lr=args.lr,
         momentum=args.momentum,
-        weight_decay=10**args.wd,
+        weight_decay=10 ** args.wd,
     )
 
     # define loss function
@@ -116,19 +118,16 @@ def main(args):
     # creating cluster assignments log
     cluster_log = Logger(os.path.join(args.exp, 'clusters'))
 
-    # preprocessing of data
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-    tra = [transforms.Resize(224),
-           transforms.ToTensor(),
-           normalize]
+    # Loading and preprocessing of data: custom Rescale and ToTensor transformations for VidDataset.
+    # VidDataset has a box_frame, which is a pandas Dataframe containing images path an their bb coordinates.
+    # Each VidDataset sample is a dict formed by a tensor (the image) and crop_coord (bb xmin, xmax, ymin, ymax).
 
-    # load the data
+    tra = [preprocessing.Rescale((224, 224)),
+           preprocessing.ToTensor()]
+
     end = time.time()
-    # TODO apply transformations
-    dataset = VidDataset(xml_annotations_dir='annotations', root_dir='trainset')
+    dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
 
-    dataset = datasets.ImageFolder(args.data, transform=transforms.Compose(tra))
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))
 
@@ -207,7 +206,7 @@ def main(args):
         torch.save({'epoch': epoch + 1,
                     'arch': args.arch,
                     'state_dict': model.state_dict(),
-                    'optimizer' : optimizer.state_dict()},
+                    'optimizer': optimizer.state_dict()},
                    os.path.join(args.exp, 'checkpoint.pth.tar'))
 
         # save cluster assignments
@@ -237,7 +236,7 @@ def train(loader, model, crit, opt, epoch):
     optimizer_tl = torch.optim.SGD(
         model.top_layer.parameters(),
         lr=args.lr,
-        weight_decay=10**args.wd,
+        weight_decay=10 ** args.wd,
     )
 
     end = time.time()
@@ -258,7 +257,7 @@ def train(loader, model, crit, opt, epoch):
                 'epoch': epoch + 1,
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
-                'optimizer' : opt.state_dict()
+                'optimizer': opt.state_dict()
             }, path)
 
         target = target.cuda()
@@ -292,15 +291,16 @@ def train(loader, model, crit, opt, epoch):
 
     return losses.avg
 
+
 def compute_features(dataloader, model, N):
     if args.verbose:
         print('Compute features')
     batch_time = AverageMeter()
     end = time.time()
     model.eval()
-    # discard the label information in the dataloader
-    for i, (input_tensor, _) in enumerate(dataloader):
-        input_var = torch.autograd.Variable(input_tensor.cuda(), volatile=True)
+    # discard the label information in the dataloader; load the sample image.
+    for i, sample in enumerate(dataloader):
+        input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
         aux = model(input_var).data.cpu().numpy()
 
         if i == 0:

@@ -10,14 +10,28 @@ import torchvision.transforms.functional as TF
 
 
 def list_files(root_path):
-    bb_list = []
+    """
+    Args:
+        root_path (string): root path of dir to be walked.
+
+    Returns:
+        path_list (list): all path found in walked dir.
+    """
+    path_list = []
     for path, subdirs, files in os.walk(root_path):
         for name in files:
-            bb_list.append(os.path.join(path, name))
-    return bb_list
+            path_list.append(os.path.join(path, name))
+    return path_list
 
 
 def parse_annotation(ann):
+    """
+    Args:
+        ann: an xml file with bb annotations: xmin, xmax, ymin, ymax
+
+    Returns:
+        a list with bb coordinates for a given image.
+    """
     xml = minidom.parse(ann)
     x_min, x_max, y_min, y_max = int(xml.getElementsByTagName('xmin')[0].firstChild.data), \
                                  int(xml.getElementsByTagName('xmax')[0].firstChild.data), \
@@ -27,18 +41,36 @@ def parse_annotation(ann):
 
 
 def crop(img_desc):
+    """
+    Args:
+        img_desc: a box_frame row which describes an image, with its path and its bb coordinates annotations.
+
+    Returns:
+        an ndarray representing the cropped bb image.
+    Notes:
+         the given image is read as a PIL image to be cropped; the it is converted as a normalized float32 ndarray
+         for further manipulation in nn.
+    """
     img = Image.fromarray(io.imread(img_desc['img']).astype('uint8'))
     height, width = img_desc['y_max'] - img_desc['y_min'], img_desc['x_max'] - img_desc['x_min']
     img_cropped = TF.crop(img, img_desc['y_min'], img_desc['x_min'], height, width)
-    return np.array(img_cropped)
-    # plt.imshow(img_cropped)
-    # plt.show()
+    return np.array(img_cropped).astype('float32') / 255
 
 
 class VidDataset(Dataset):
     """VID dataset."""
 
     def __init__(self, xml_annotations_dir, root_dir, transform=None):
+        """
+        Args:
+            xml_annotations_dir (string): Path to the dir with images annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        Notes:
+             xml_xml_annotations_dir and root_dir have the same structure since
+              each images folder has its annotations folder counterpart.
+        """
 
         self.annotations = list_files(xml_annotations_dir)
         self.images = list_files(root_dir)
@@ -48,7 +80,6 @@ class VidDataset(Dataset):
             df_row = [img] + parse_annotation(ann)
             self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                                                    ignore_index=True)
-
         self.root_dir = root_dir
         self.transform = transform
 

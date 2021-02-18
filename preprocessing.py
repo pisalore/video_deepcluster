@@ -41,7 +41,7 @@ class ToTensor(object):
 
     def __call__(self, sample):
         image, crop_coord = sample['image'], sample['crop_coord']
-
+        # TODO: Normalization, if needed
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
 
