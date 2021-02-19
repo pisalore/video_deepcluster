@@ -299,7 +299,6 @@ def compute_features(dataloader, model, N):
     model.eval()
     # discard the label information in the dataloader; load the sample image.
     for i, sample in enumerate(dataloader):
-        print(i, "inside enumerate")
         input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
         aux = model(input_var).data.cpu().numpy()
 

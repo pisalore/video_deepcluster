@@ -18,7 +18,7 @@ EPOCHS=100
 BATCH=256
 mkdir -p ${EXP}
 
-CUDA_VISIBLE_DEVICES=1 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
+CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
   --lr ${LR} --wd ${WD} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
 
