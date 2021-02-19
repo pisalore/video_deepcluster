@@ -49,8 +49,8 @@ class ToTensor(object):
         # torch image: C X H X W
         image = image.transpose((2, 0, 1))
 
-        return {'image': torch.from_numpy(image),
-                'crop_coord': torch.from_numpy(crop_coord)}
-
-        # return {'image': normalize(torch.from_numpy(image)),
+        # return {'image': torch.from_numpy(image),
         #         'crop_coord': torch.from_numpy(crop_coord)}
+
+        return {'image': normalize(torch.from_numpy(image)),
+                'crop_coord': torch.from_numpy(crop_coord)}

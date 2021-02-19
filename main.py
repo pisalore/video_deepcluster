@@ -125,7 +125,7 @@ def main(args):
            preprocessing.ToTensor()]
 
     end = time.time()
-    dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+    dataset = VidDataset(xml_annotations_dir=args.ann, root=args.data, transform=transforms.Compose(tra))
 
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))

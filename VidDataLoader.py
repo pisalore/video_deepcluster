@@ -1,5 +1,4 @@
 import torch
-from torch.utils.data import Dataset
 from skimage import io
 import numpy as np
 import pandas as pd
@@ -7,6 +6,7 @@ import os
 from xml.dom import minidom
 from PIL import Image
 import torchvision.transforms.functional as TF
+from torchvision.datasets import ImageFolder
 
 
 def list_files(root_path):
@@ -65,10 +65,10 @@ def crop(img_desc):
     return np.array(img_cropped).astype('float32') / 255
 
 
-class VidDataset(Dataset):
+class VidDataset(ImageFolder):
     """VID dataset."""
 
-    def __init__(self, xml_annotations_dir, root_dir, transform=None):
+    def __init__(self, xml_annotations_dir, root: str, transform=None):
         """
         Args:
             xml_annotations_dir (string): Path to the dir with images annotations.
@@ -79,14 +79,16 @@ class VidDataset(Dataset):
              xml_xml_annotations_dir and root_dir have the same structure since
               each images folder has its annotations folder counterpart.
         """
+        super().__init__(root, transform)
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
-        for img, ann in zip(list_files(root_dir), list_files(xml_annotations_dir)):
+        for img, ann in zip(list_files(root), list_files(xml_annotations_dir)):
             # print(img)
             img_coord = parse_annotation(img, ann)
             if img_coord:
                 df_row = [img] + img_coord
-                self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
-                                               ignore_index=True)
+                self.box_frame = self.box_frame.append(
+                    pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
+                    ignore_index=True)
         print("Dataset loading completed. \n")
         self.transform = transform
 
