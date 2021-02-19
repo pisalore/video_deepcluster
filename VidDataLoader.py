@@ -79,19 +79,15 @@ class VidDataset(Dataset):
              xml_xml_annotations_dir and root_dir have the same structure since
               each images folder has its annotations folder counterpart.
         """
-
-        self.annotations = list_files(xml_annotations_dir)
-        self.images = list_files(root_dir)
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
-        for img, ann in zip(self.images, self.annotations):
-            print(img)
+        for img, ann in zip(list_files(root_dir), list_files(xml_annotations_dir)):
+            # print(img)
             img_coord = parse_annotation(img, ann)
             if img_coord:
                 df_row = [img] + img_coord
                 self.box_frame = self.box_frame.append(pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
-                                                   ignore_index=True)
-
-        self.root_dir = root_dir
+                                               ignore_index=True)
+        print("Dataset loading completed. \n")
         self.transform = transform
 
     def __len__(self):
