@@ -299,7 +299,7 @@ def compute_features(dataloader, model, N):
     model.eval()
     # discard the label information in the dataloader; load the sample image.
     for i, sample in enumerate(dataloader):
-        print(i)
+        print(i, "inside enumerate")
         input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
         aux = model(input_var).data.cpu().numpy()
 
@@ -321,7 +321,6 @@ def compute_features(dataloader, model, N):
             print('{0} / {1}\t'
                   'Time: {batch_time.val:.3f} ({batch_time.avg:.3f})'
                   .format(i, len(dataloader), batch_time=batch_time))
-    print("read features", features)
     return features
 
 
