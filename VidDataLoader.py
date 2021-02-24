@@ -83,7 +83,7 @@ class VidDataset(ImageFolder):
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
         for idx, ann in enumerate(list_files(xml_annotations_dir)):
             # ann_split = ann.split('\\')
-            ann_split = [root] + list(PurePath(ann).parts)[1:]
+            ann_split = [root] + list(PurePath(ann).parts)[6:]
             img = '/'.join(ann_split[:3]) + '/' + ann_split[-1].split('.')[0] + '.JPEG'
             img_coord = parse_annotation(img, ann)
             # add image to dataset iff both image and its coordinates exist
