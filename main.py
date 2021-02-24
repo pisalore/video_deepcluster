@@ -80,6 +80,7 @@ def main(args):
     model.features = torch.nn.DataParallel(model.features)
     model.cuda()
     cudnn.benchmark = True
+    print('CNN builded.')
 
     # create optimizer
     optimizer = torch.optim.SGD(
@@ -88,6 +89,7 @@ def main(args):
         momentum=args.momentum,
         weight_decay=10 ** args.wd,
     )
+    print('Optimizer created.')
 
     # define loss function
     criterion = nn.CrossEntropyLoss().cuda()
@@ -124,6 +126,7 @@ def main(args):
     tra = [preprocessing.Rescale((224, 224)),
            preprocessing.ToTensor()]
 
+    print('Start loading dataset...')
     end = time.time()
     dataset = VidDataset(xml_annotations_dir=args.ann, root=args.data, transform=transforms.Compose(tra))
 
