@@ -44,7 +44,7 @@ def parse_annotation(img, ann):
         return [x_min, x_max, y_min, y_max]
     except Exception as e:
         print("Error:", e.__class__, "occurred for img " + img)
-        print("Next entry. \n")
+        print("Next entry.")
         pass
 
 
@@ -94,7 +94,7 @@ class VidDataset(ImageFolder):
                     pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                     ignore_index=True)
             else:
-                print('No loaded: ', img)
+                print('No loaded: ', img, '\n')
         print("Dataset loading completed. \n")
         self.transform = transform
 
