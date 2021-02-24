@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/ILSVRC2015_VID_train_0000"
-ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/ILSVRC2015_VID_train_0000"
+DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
+ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
 ARCH="alexnet"
 LR=0.05
 WD=-5

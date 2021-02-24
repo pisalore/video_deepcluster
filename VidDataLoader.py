@@ -7,6 +7,7 @@ from xml.dom import minidom
 from PIL import Image
 import torchvision.transforms.functional as TF
 from torchvision.datasets import ImageFolder
+from pathlib import PurePath
 
 
 def list_files(root_path):
@@ -43,8 +44,7 @@ def parse_annotation(img, ann):
         return [x_min, x_max, y_min, y_max]
     except Exception as e:
         print("Error:", e.__class__, "occurred for img " + img)
-        print("Next entry.")
-        print()
+        print("Next entry. \n")
         pass
 
 
@@ -81,11 +81,15 @@ class VidDataset(ImageFolder):
         """
         super().__init__(root, transform)
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
-        for img, ann in zip(list_files(root), list_files(xml_annotations_dir)):
-            # print(img)
+        for idx, ann in enumerate(list_files(xml_annotations_dir)):
+            # ann_split = ann.split('\\')
+            ann_split = [root] + list(PurePath(ann).parts)[1:]
+            img = '/'.join(ann_split[:3]) + '/' + ann_split[-1].split('.')[0] + '.JPEG'
             img_coord = parse_annotation(img, ann)
-            if img_coord:
+            # add image to dataset iff both image and its coordinates exist
+            if img_coord and os.path.exists(img):
                 df_row = [img] + img_coord
+                print('Loaded ', idx, ' images: ', df_row[0], ann, '\n')
                 self.box_frame = self.box_frame.append(
                     pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                     ignore_index=True)
