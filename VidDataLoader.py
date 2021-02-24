@@ -84,7 +84,8 @@ class VidDataset(ImageFolder):
         for idx, ann in enumerate(list_files(xml_annotations_dir)):
             # Substitute 'Annotations? with 'Data' and 'xml' with '.JPEG -> img path
             ann_path = list(PurePath(ann).parts)
-            ann_path[3], ann_path[-1] = 'Data', ann_path[-1].split('.')[0] + '.JPEG'
+            # 3
+            ann_path[4], ann_path[-1] = 'Data', ann_path[-1].split('.')[0] + '.JPEG'
             img = '/'.join(ann_path)
             img_coord = parse_annotation(img, ann)
             # add image to dataset iff both image and its coordinates exist
