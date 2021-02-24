@@ -7,6 +7,8 @@
 #!/bin/bash
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
+#DATA_DIR="/home/lpisaneschi/trainset_test/ILSVRC2015_VID_train_0000"
+#ANN_DIR="/home/lpisaneschi/annotations_test/ILSVRC2015_VID_train_0000"
 ARCH="alexnet"
 LR=0.05
 WD=-5
@@ -14,7 +16,7 @@ K=30
 WORKERS=12
 EXP="/home/${USER}/test/exp"
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
-EPOCHS=100
+EPOCHS=200
 BATCH=256
 mkdir -p ${EXP}
 
