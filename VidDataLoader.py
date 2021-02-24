@@ -93,6 +93,8 @@ class VidDataset(ImageFolder):
                 self.box_frame = self.box_frame.append(
                     pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
                     ignore_index=True)
+            else:
+                print('No loaded: ', img)
         print("Dataset loading completed. \n")
         self.transform = transform
 
