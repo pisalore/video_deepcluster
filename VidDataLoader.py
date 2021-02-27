@@ -68,13 +68,14 @@ def crop(img_desc):
 class VidDataset(ImageFolder):
     """VID dataset."""
 
-    def __init__(self, xml_annotations_dir, root: str, transform=None):
+    def __init__(self, xml_annotations_dir, root: str, step: int, transform=None):
         """
         Args:
             xml_annotations_dir (string): Path to the dir with images annotations.
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
+            step (int): load images from dataset by step
         Notes:
              xml_xml_annotations_dir and root_dir have the same structure since
               each images folder has its annotations folder counterpart.
@@ -82,22 +83,23 @@ class VidDataset(ImageFolder):
         super().__init__(root, transform)
         self.box_frame = pd.DataFrame(columns=['img', 'x_min', 'x_max', 'y_min', 'y_max'])
         for idx, ann in enumerate(list_files(xml_annotations_dir)):
-            # Substitute 'Annotations? with 'Data' and 'xml' with '.JPEG -> img path
-            ann_path = list(PurePath(ann).parts)
-            # 3
-            ann_path[4], ann_path[-1] = 'Data', ann_path[-1].split('.')[0] + '.JPEG'
-            img = '/'.join(ann_path)
-            img_coord = parse_annotation(img, ann)
-            # add image to dataset iff both image and its coordinates exist
-            if img_coord and os.path.exists(img):
-                df_row = [img] + img_coord
-                print('Loaded ', idx, ' images: ', df_row[0], ann, '\n')
-                self.box_frame = self.box_frame.append(
-                    pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
-                    ignore_index=True)
-            else:
-                print('No loaded: ', img, '\n')
-        print("Dataset loading completed. \n")
+            if not idx % step:
+                # Substitute 'Annotations' with 'Data' and 'xml' with '.JPEG -> img path
+                ann_path = list(PurePath(ann).parts)
+                # 3
+                ann_path[4], ann_path[-1] = 'Data', ann_path[-1].split('.')[0] + '.JPEG'
+                img = '/'.join(ann_path)
+                img_coord = parse_annotation(img, ann)
+                # add image to dataset iff both image and its coordinates exist
+                if img_coord and os.path.exists(img):
+                    df_row = [img] + img_coord
+                    print('Processed ', idx // step + 1, ' images: ', df_row[0], ann, '\n')
+                    self.box_frame = self.box_frame.append(
+                        pd.Series(df_row, index=['img', 'x_min', 'x_max', 'y_min', 'y_max']),
+                        ignore_index=True)
+                else:
+                    print('No loaded: ', img, '\n')
+        print("Dataset loading completed. Loaded", + len(self.box_frame.index), "images \n")
         self.transform = transform
 
     def __len__(self):

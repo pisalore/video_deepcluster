@@ -31,6 +31,7 @@ def parse_args():
 
     parser.add_argument('data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
+    parser.add_argument('--load_step', metavar='STEP', type=int, default=1, help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -128,7 +129,7 @@ def main(args):
 
     print('Start loading dataset...')
     end = time.time()
-    dataset = VidDataset(xml_annotations_dir=args.ann, root=args.data, transform=transforms.Compose(tra))
+    dataset = VidDataset(xml_annotations_dir=args.ann, root=args.data, step=args.load_step, transform=transforms.Compose(tra))
 
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))

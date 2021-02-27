@@ -7,8 +7,7 @@
 #!/bin/bash
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
-#DATA_DIR="/home/lpisaneschi/trainset_test/ILSVRC2015_VID_train_0000"
-#ANN_DIR="/home/lpisaneschi/annotations_test/ILSVRC2015_VID_train_0000"
+STEP=2
 ARCH="alexnet"
 LR=0.05
 WD=-5
@@ -20,7 +19,7 @@ EPOCHS=200
 BATCH=256
 mkdir -p ${EXP}
 
-CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
+CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --load_step ${STEP} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
   --lr ${LR} --wd ${WD} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
 
