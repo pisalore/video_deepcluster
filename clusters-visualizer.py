@@ -26,8 +26,7 @@ def save_cluster_imgs(dataset, clusters, save_dir):
         with open(os.path.join(save_dir, str(idx) + "_cluster.txt"), "w") as output:
             output.write("Cluster " + str(idx) + '\n')
             for im in c:
-                if im < 1163:
-                    output.write(str(dataset[im][0] + '\n'))
+                output.write(str(dataset[im][0] + '\n'))
 
 
 def main(args):
