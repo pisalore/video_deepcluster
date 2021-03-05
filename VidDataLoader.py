@@ -1,4 +1,3 @@
-import torch
 from skimage import io
 import numpy as np
 from xml.dom import minidom

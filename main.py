@@ -138,9 +138,11 @@ def main(args):
     print('Start loading dataset...')
     end = time.time()
     dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+    dataset.imgs = dataset.imgs[0::args.load_step]
 
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))
+        print("Loaded", len(dataset), "images")
 
     dataloader = torch.utils.data.DataLoader(dataset,
                                              batch_size=args.batch,
@@ -160,7 +162,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset
-        features = compute_features(dataloader, model, len(dataset), args.load_step)
+        features = compute_features(dataloader, model, args.load_step)
 
         # cluster the features
         if args.verbose:
@@ -304,7 +306,7 @@ def train(loader, model, crit, opt, epoch):
     return losses.avg
 
 
-def compute_features(dataloader, model, N, step):
+def compute_features(dataloader, model, step):
     if args.verbose:
         print('Compute features')
     batch_time = AverageMeter()
@@ -317,7 +319,7 @@ def compute_features(dataloader, model, N, step):
             aux = model(input_var).data.cpu().numpy()
 
             if i == 0:
-                features = np.zeros((N, aux.shape[1]), dtype='float32')
+                features = np.zeros((len(sample['image']), aux.shape[1]), dtype='float32')
 
             aux = aux.astype('float32')
 
