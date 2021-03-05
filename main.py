@@ -163,7 +163,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset
-        features = compute_features(dataloader, model, args.load_step)
+        features = compute_features(dataloader, model, args.load_step, len(dataset))
 
         # cluster the features
         if args.verbose:
@@ -307,7 +307,7 @@ def train(loader, model, crit, opt, epoch):
     return losses.avg
 
 
-def compute_features(dataloader, model, step):
+def compute_features(dataloader, model, step, N):
     if args.verbose:
         print('Compute features')
     batch_time = AverageMeter()
@@ -320,7 +320,7 @@ def compute_features(dataloader, model, step):
             aux = model(input_var).data.cpu().numpy()
 
             if i == 0:
-                features = np.zeros((len(sample['image']), aux.shape[1]), dtype='float32')
+                features = np.zeros((N, aux.shape[1]), dtype='float32')
 
             aux = aux.astype('float32')
 
