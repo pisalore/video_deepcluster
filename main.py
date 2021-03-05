@@ -16,6 +16,7 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
+from torch.utils.data.dataloader import default_collate
 import torchvision.transforms as transforms
 
 import preprocessing
@@ -31,7 +32,8 @@ def parse_args():
 
     parser.add_argument('data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
-    parser.add_argument('--load_step', metavar='STEP', type=int, default=1, help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
+    parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
+                        help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -64,6 +66,12 @@ def parse_args():
     parser.add_argument('--exp', type=str, default='', help='path to exp folder')
     parser.add_argument('--verbose', action='store_true', help='chatty')
     return parser.parse_args()
+
+
+# clean batches
+def my_collate(batch):
+    batch = list(filter(lambda x: x is not None, batch))
+    return default_collate(batch)
 
 
 def main(args):
@@ -137,7 +145,8 @@ def main(args):
     dataloader = torch.utils.data.DataLoader(dataset,
                                              batch_size=args.batch,
                                              num_workers=args.workers,
-                                             pin_memory=True)
+                                             pin_memory=True,
+                                             collate_fn=my_collate)
 
     # clustering algorithm to use
     deepcluster = clustering.__dict__[args.clustering](args.nmb_cluster)

@@ -28,6 +28,7 @@ def parse_annotation(img, ann):
     except Exception as e:
         print("Error:", e.__class__, "occurred for img " + img)
         print("Next entry.")
+        return None
 
 
 def crop(img_path, annotations_dir_path):
@@ -45,9 +46,12 @@ def crop(img_path, annotations_dir_path):
     img = Image.fromarray(io.imread(img_path).astype('uint8'))
     ann_path = (annotations_dir_path + img_path.split('/train/')[1]).split('.')[0]+'.xml'
     img_crop_coord = parse_annotation(img_path, ann_path)
-    height, width = img_crop_coord['y_max'] - img_crop_coord['y_min'], img_crop_coord['x_max'] - img_crop_coord['x_min']
-    img_cropped = TF.crop(img, img_crop_coord['y_min'], img_crop_coord['x_min'], height, width)
-    return {'crop': np.array(img_cropped).astype('float32') / 255, 'coords': img_crop_coord}
+    if img_crop_coord:
+        height, width = img_crop_coord['y_max'] - img_crop_coord['y_min'], img_crop_coord['x_max'] - img_crop_coord['x_min']
+        img_cropped = TF.crop(img, img_crop_coord['y_min'], img_crop_coord['x_min'], height, width)
+        return {'crop': np.array(img_cropped).astype('float32') / 255, 'coords': img_crop_coord}
+    else:
+        return None
 
 
 class VidDataset(ImageFolder):
@@ -71,16 +75,17 @@ class VidDataset(ImageFolder):
         return len(self.imgs)
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
         cropped_image = crop(self.imgs[idx][0], self.annotations_dir)
-        crop_coords = np.array(list(cropped_image['coords'].values())).astype('float32')
-        sample = {'image': cropped_image['crop'], 'crop_coord': crop_coords}
+        if cropped_image is not None:
+            crop_coords = np.array(list(cropped_image['coords'].values())).astype('float32')
+            sample = {'image': cropped_image['crop'], 'crop_coord': crop_coords, 'name': self.imgs[idx][0]}
 
-        if self.transform:
-            sample = self.transform(sample)
+            if self.transform:
+                sample = self.transform(sample)
 
-        return sample
+            return sample
+        else:
+            return None
+
 
 
