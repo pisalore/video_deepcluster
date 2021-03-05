@@ -139,6 +139,7 @@ def main(args):
     end = time.time()
     dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
     dataset.imgs = dataset.imgs[0::args.load_step]
+    dataset.samples = dataset.samples[0::args.load_step]
 
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))
