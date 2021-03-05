@@ -151,7 +151,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset
-        features = compute_features(dataloader, model, len(dataset), args.step)
+        features = compute_features(dataloader, model, len(dataset), args.load_step)
 
         # cluster the features
         if args.verbose:
@@ -303,7 +303,7 @@ def compute_features(dataloader, model, N, step):
     model.eval()
     # discard the label information in the dataloader; load the sample image.
     for i, sample in enumerate(dataloader):
-        if not i % 2:
+        if not i % step:
             input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
             aux = model(input_var).data.cpu().numpy()
 
@@ -326,6 +326,8 @@ def compute_features(dataloader, model, N, step):
                 print('{0} / {1}\t'
                       'Time: {batch_time.val:.3f} ({batch_time.avg:.3f})'
                       .format(i, len(dataloader), batch_time=batch_time))
+        else:
+            pass
     return features
 
 

@@ -1,7 +1,6 @@
 import torch
 from skimage import transform
 from torchvision.transforms import transforms
-import numpy as np
 
 
 class Rescale(object):
@@ -30,28 +29,24 @@ class Rescale(object):
             new_h, new_w = self.output_size
 
         new_h, new_w = int(new_h), int(new_w)
-
         img = transform.resize(image, (new_h, new_w))
 
-        return {'image': img, 'crop_coord': sample['crop_coord']}
+        sample['image'] = img
+
+        return sample
 
 
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
-        image, crop_coord = sample['image'], sample['crop_coord']
-        # TODO: Normalization, if needed
+        image = sample['image']
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
-
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
         image = image.transpose((2, 0, 1))
+        sample['image'] = normalize(torch.from_numpy(image))
 
-        # return {'image': torch.from_numpy(image),
-        #         'crop_coord': torch.from_numpy(crop_coord)}
-
-        return {'image': normalize(torch.from_numpy(image)),
-                'crop_coord': torch.from_numpy(crop_coord)}
+        return sample
