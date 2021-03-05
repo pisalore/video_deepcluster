@@ -7,11 +7,11 @@
 #!/bin/bash
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
-STEP=2
+STEP=5
 ARCH="alexnet"
 LR=0.05
 WD=-5
-K=30
+K=150
 WORKERS=12
 EXP="/thecube/students/${USER}/test/exp"
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"

@@ -1,6 +1,7 @@
 import torch
 from skimage import transform
 from torchvision.transforms import transforms
+import numpy as np
 
 
 class Rescale(object):
@@ -17,7 +18,7 @@ class Rescale(object):
         self.output_size = output_size
 
     def __call__(self, sample):
-        image, crop_coord = sample['image'], sample['crop_coord']
+        image = sample['image']
 
         h, w = image.shape[:2]
         if isinstance(self.output_size, int):
@@ -32,7 +33,7 @@ class Rescale(object):
 
         img = transform.resize(image, (new_h, new_w))
 
-        return {'image': img, 'crop_coord': crop_coord}
+        return {'image': img, 'crop_coord': sample['crop_coord']}
 
 
 class ToTensor(object):

@@ -129,7 +129,7 @@ def main(args):
 
     print('Start loading dataset...')
     end = time.time()
-    dataset = VidDataset(xml_annotations_dir=args.ann, root=args.data, step=args.load_step, transform=transforms.Compose(tra))
+    dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
 
     if args.verbose:
         print('Load dataset: {0:.2f} s'.format(time.time() - end))
@@ -151,7 +151,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset
-        features = compute_features(dataloader, model, len(dataset))
+        features = compute_features(dataloader, model, len(dataset), args.step)
 
         # cluster the features
         if args.verbose:
@@ -295,7 +295,7 @@ def train(loader, model, crit, opt, epoch):
     return losses.avg
 
 
-def compute_features(dataloader, model, N):
+def compute_features(dataloader, model, N, step):
     if args.verbose:
         print('Compute features')
     batch_time = AverageMeter()
