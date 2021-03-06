@@ -7,6 +7,7 @@
 import argparse
 import os
 import time
+from functools import reduce
 
 import numpy as np
 from sklearn.metrics.cluster import normalized_mutual_info_score
@@ -151,6 +152,12 @@ def main(args):
                                              pin_memory=True,
                                              collate_fn=my_collate)
 
+    dataset_len = 0
+    for s in dataloader:
+        dataset_len += len(s['image'])
+
+    print("Dataset final dimension: ", dataset_len)
+
     # clustering algorithm to use
     deepcluster = clustering.__dict__[args.clustering](args.nmb_cluster)
 
@@ -163,7 +170,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset
-        features = compute_features(dataloader, model, args.load_step, len(dataset))
+        features = compute_features(dataloader, model, args.load_step, dataset_len)
 
         # cluster the features
         if args.verbose:
@@ -314,6 +321,7 @@ def compute_features(dataloader, model, step, N):
     end = time.time()
     model.eval()
     # discard the label information in the dataloader; load the sample image.
+
     for i, sample in enumerate(dataloader):
         if not i % step:
             input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
