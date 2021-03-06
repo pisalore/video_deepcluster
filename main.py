@@ -7,7 +7,6 @@
 import argparse
 import os
 import time
-from functools import reduce
 
 import numpy as np
 from sklearn.metrics.cluster import normalized_mutual_info_score
@@ -152,11 +151,12 @@ def main(args):
                                              pin_memory=True,
                                              collate_fn=my_collate)
 
-    dataset_len = 0
-    for s in dataloader:
-        dataset_len += len(s['image'])
+    # calculate batch size sum
+    # dataset_len = 0
+    # for s in dataloader:
+    #     dataset_len += len(s['image'])
 
-    print("Dataset final dimension: ", dataset_len)
+    # print("Dataset final dimension: ", dataset_len)
 
     # clustering algorithm to use
     deepcluster = clustering.__dict__[args.clustering](args.nmb_cluster)
@@ -169,8 +169,8 @@ def main(args):
         model.top_layer = None
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
-        # get the features for the whole dataset
-        features = compute_features(dataloader, model, args.load_step, dataset_len)
+        # get the features for the whole dataset hardcoded dataset dim for step=5
+        features = compute_features(dataloader, model, args.load_step, 217244)
 
         # cluster the features
         if args.verbose:
@@ -322,6 +322,7 @@ def compute_features(dataloader, model, step, N):
     model.eval()
     # discard the label information in the dataloader; load the sample image.
 
+    prev_batch_len = 0
     for i, sample in enumerate(dataloader):
         if not i % step:
             input_var = torch.autograd.Variable(sample['image'].cuda(), volatile=True)
@@ -332,12 +333,14 @@ def compute_features(dataloader, model, step, N):
 
             aux = aux.astype('float32')
 
-            if i < len(dataloader) - 1:
-                features[i * args.batch: (i + 1) * args.batch] = aux
-            else:
-                # special treatment for final batch
-                features[i * args.batch:] = aux
+            # if i < len(dataloader) - 1:
+            #     features[i * args.batch: (i + 1) * args.batch] = aux
+            # else:
+            #     # special treatment for final batch
+            #     features[i * args.batch:] = aux
+            features[prev_batch_len: prev_batch_len + len(sample['image'])] = aux
 
+            prev_batch_len += len(sample['image'])
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
