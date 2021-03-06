@@ -34,6 +34,8 @@ def parse_args():
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
                         help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
+    parser.add_argument('--dataset_dim', '--dataset_dim', type=int,
+                        help='number of cluster for k-means (default: 10000)')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -151,12 +153,16 @@ def main(args):
                                              pin_memory=True,
                                              collate_fn=my_collate)
 
-    # calculate batch size sum
-    # dataset_len = 0
-    # for s in dataloader:
-    #     dataset_len += len(s['image'])
+    # calculate batch size sum (better clean-up data with data-cleaner.py
+    # or pass dataset_dim in main.sh with cleaned dataset dim, if known
+    dataset_len = 0
+    if not args.dataset_dim:
+        for s in dataloader:
+            dataset_len += len(s['image'])
+    else:
+        dataset_len = args.dataset_dim
 
-    # print("Dataset final dimension: ", dataset_len)
+    print("Dataset final dimension: ", dataset_len)
 
     # clustering algorithm to use
     deepcluster = clustering.__dict__[args.clustering](args.nmb_cluster)
@@ -170,7 +176,7 @@ def main(args):
         model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])
 
         # get the features for the whole dataset hardcoded dataset dim for step=5
-        features = compute_features(dataloader, model, args.load_step, 217244)
+        features = compute_features(dataloader, model, args.load_step, dataset_len)
 
         # cluster the features
         if args.verbose:
@@ -333,11 +339,7 @@ def compute_features(dataloader, model, step, N):
 
             aux = aux.astype('float32')
 
-            # if i < len(dataloader) - 1:
-            #     features[i * args.batch: (i + 1) * args.batch] = aux
-            # else:
-            #     # special treatment for final batch
-            #     features[i * args.batch:] = aux
+            # adapt features assignment to batch dimensions in order to avoid broadcasting problems
             features[prev_batch_len: prev_batch_len + len(sample['image'])] = aux
 
             prev_batch_len += len(sample['image'])
