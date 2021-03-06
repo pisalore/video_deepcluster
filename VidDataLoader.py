@@ -25,8 +25,8 @@ def parse_annotation(img, ann):
         return {'x_min': x_min, 'x_max': x_max, 'y_min': y_min, 'y_max': y_max}
 
     except Exception as e:
-        print("Error:", e.__class__, "occurred for img " + img)
-        print("Next entry.")
+        # print("Error:", e.__class__, "occurred for img " + img)
+        # print("Next entry.")
         return None
 
 
