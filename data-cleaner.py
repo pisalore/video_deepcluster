@@ -50,7 +50,7 @@ def parse_annotation(img, ann):
 
 
 def main(args):
-    data, annotations, counter = list_files(args.data), list_files(args.ann), 0
+    data, annotations = list_files(args.data), list_files(args.ann)
     print("Number of images:", len(data), "\nNumber of annotations:", len(annotations))
     for idx, img in enumerate(data):
         ann = (args.ann + img.split('/train/')[1]).split('.')[0] + '.xml'
@@ -58,6 +58,7 @@ def main(args):
             os.remove(img)
             print("Removed" + img + "\n")
             print("Analyzed ", idx, "images")
+    print('Task terminated')
 
 
 if __name__ == '__main__':
