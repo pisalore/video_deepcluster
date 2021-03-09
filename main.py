@@ -222,18 +222,14 @@ def main(args):
                   'Clustering loss: {2:.3f} \n'
                   'ConvNet loss: {3:.3f}'
                   .format(epoch, time.time() - end, clustering_loss, loss))
-
-            epochs_log.log(['###### Epoch [{0}] ###### \n'
-                            'Time: {1:.3f} s\n'
-                            'Clustering loss: {2:.3f} \n'
-                            'ConvNet loss: {3:.3f}'
-                           .format(epoch, time.time() - end, clustering_loss, loss)])
+            epoch_log = [epoch, time.time() - end, clustering_loss, loss]
             try:
                 nmi = normalized_mutual_info_score(
                     clustering.arrange_clustering(deepcluster.images_lists),
                     clustering.arrange_clustering(cluster_log.data[-1])
                 )
                 print('NMI against previous assignment: {0:.3f}'.format(nmi))
+                epoch_log.append(nmi)
             except IndexError:
                 pass
             print('####################### \n')
@@ -246,6 +242,7 @@ def main(args):
 
         # save cluster assignments
         cluster_log.log(deepcluster.images_lists)
+        epochs_log.log(epoch_log)
 
 
 def train(loader, model, crit, opt, epoch):
