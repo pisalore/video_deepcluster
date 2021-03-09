@@ -129,6 +129,7 @@ def main(args):
 
     # creating cluster assignments log
     cluster_log = Logger(os.path.join(args.exp, 'clusters'))
+    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
 
     # Loading and preprocessing of data: custom Rescale and ToTensor transformations for VidDataset.
     # VidDataset has a box_frame, which is a pandas Dataframe containing images path an their bb coordinates.
@@ -221,6 +222,12 @@ def main(args):
                   'Clustering loss: {2:.3f} \n'
                   'ConvNet loss: {3:.3f}'
                   .format(epoch, time.time() - end, clustering_loss, loss))
+
+            epochs_log.log(['###### Epoch [{0}] ###### \n'
+                            'Time: {1:.3f} s\n'
+                            'Clustering loss: {2:.3f} \n'
+                            'ConvNet loss: {3:.3f}'
+                           .format(epoch, time.time() - end, clustering_loss, loss)])
             try:
                 nmi = normalized_mutual_info_score(
                     clustering.arrange_clustering(deepcluster.images_lists),
