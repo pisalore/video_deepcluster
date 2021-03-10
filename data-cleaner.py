@@ -51,12 +51,14 @@ def parse_annotation(ann):
 
 
 def main(args):
-    print('Clean dataset...')
+    print('Load dataset...')
     logging.basicConfig(filename=args.log + 'clean.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
     tra = [preprocessing.Rescale((224, 224)),
            preprocessing.ToTensor()]
     dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+    print('Dataset loaded.\n')
+    print('Clean dataset...\n')
     not_annotated_imgs_idx = []
     for idx, img in enumerate(dataset.imgs):
         ann = (args.ann + img[0].split('/train/')[1]).split('.')[0] + '.xml'
