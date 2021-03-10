@@ -20,6 +20,7 @@ def parse_args():
 
 
 def serialize(dataset, tag='vid_dataset'):
+    print('Serializing cleaned dataset...')
     now = datetime.datetime.now()
     date_str = f'{now.year}.{now.month}.{now.day}_{now.hour}_{now.minute}_{now.second}'
     filename = f'{tag}_{date_str}'
@@ -27,7 +28,7 @@ def serialize(dataset, tag='vid_dataset'):
         pickle.dump(dataset, f)
 
 
-def parse_annotation(img, ann):
+def parse_annotation(ann):
     """
     Args:
         img (string): the image to which coordinates are related
@@ -45,12 +46,12 @@ def parse_annotation(img, ann):
         int(xml.getElementsByTagName('ymax')[0].firstChild.data)
         return True
 
-    except Exception as e:
-        print("No annotations are provided for", img)
+    except Exception:
         return False
 
 
 def main(args):
+    print('Clean dataset...')
     logging.basicConfig(filename=args.log + 'clean.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
     tra = [preprocessing.Rescale((224, 224)),
@@ -59,15 +60,16 @@ def main(args):
     not_annotated_imgs_idx = []
     for idx, img in enumerate(dataset.imgs):
         ann = (args.ann + img[0].split('/train/')[1]).split('.')[0] + '.xml'
-        if not parse_annotation(img, ann):
+        if not parse_annotation(ann):
             not_annotated_imgs_idx.append(idx)
             logging.info("Removed " + img[0] + "\n")
+        if not (idx+1) % 1000:
             print("Analyzed ", idx+1, "images")
     for i in sorted(not_annotated_imgs_idx, reverse=True):
         del dataset.imgs[i]
-    print('Task terminated')
     logging.info("Removed " + str(len(not_annotated_imgs_idx)) + " images.\n")
     serialize(dataset)
+    print('Task terminated. Find log at ' + args.log)
 
 
 if __name__ == '__main__':
