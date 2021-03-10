@@ -11,6 +11,6 @@ EXP="/thecube/students/${USER}/"
 
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 
-${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --log ${EXP}
+${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --output ${EXP}
 #/miniconda/envs/vmr/bin/python
 
