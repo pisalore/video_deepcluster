@@ -24,7 +24,7 @@ from VidDataLoader import VidDataset
 
 import clustering
 import models
-from util import AverageMeter, Logger, UnifLabelSampler
+from util import AverageMeter, Logger, UnifLabelSampler, deserialize_dataset
 
 
 def parse_args():
@@ -32,10 +32,9 @@ def parse_args():
 
     parser.add_argument('data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
+    parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serielized dataset.')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
                         help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
-    parser.add_argument('--dataset_dim', '--dataset_dim', type=int,
-                        help='number of cluster for k-means (default: 10000)')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -134,35 +133,35 @@ def main(args):
     # Loading and preprocessing of data: custom Rescale and ToTensor transformations for VidDataset.
     # VidDataset has a box_frame, which is a pandas Dataframe containing images path an their bb coordinates.
     # Each VidDataset sample is a dict formed by a tensor (the image) and crop_coord (bb xmin, xmax, ymin, ymax).
-
-    tra = [preprocessing.Rescale((224, 224)),
-           preprocessing.ToTensor()]
+    # If a pickled dataset is passed, it will be deserialized and used, else it will be normally loaded.
+    # It is useful when we want to preprocess a dataset.
 
     print('Start loading dataset...')
     end = time.time()
-    dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+    if args.dataset_pkl:
+        dataset = deserialize_dataset(args.dataset_pkl)
+    else:
+        tra = [preprocessing.Rescale((224, 224)),
+               preprocessing.ToTensor()]
+        dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+
     dataset.imgs = dataset.imgs[0::args.load_step]
     dataset.samples = dataset.samples[0::args.load_step]
-
-    if args.verbose:
-        print('Load dataset: {0:.2f} s'.format(time.time() - end))
-        print("Loaded", len(dataset), "images")
+    print('Load dataset: {0:.2f} s'.format(time.time() - end))
 
     dataloader = torch.utils.data.DataLoader(dataset,
                                              batch_size=args.batch,
                                              num_workers=args.workers,
-                                             pin_memory=True,
-                                             collate_fn=my_collate)
+                                             pin_memory=True)
 
-    # calculate batch size sum (better clean-up data with data-cleaner.py
-    # or pass dataset_dim in main.sh with cleaned dataset dim, if known
+    # calculate batch size sum (better clean-up data with data-cleaner.py)
     dataset_len = 0
-    if not args.dataset_dim:
+    if not args.dataset_pkl:
+        dataloader.collate_fn = my_collate
         for s in dataloader:
             dataset_len += len(s['image'])
     else:
-        dataset_len = args.dataset_dim
-
+        dataset_len = len(dataset.imgs)
     print("Dataset final dimension: ", dataset_len)
 
     # clustering algorithm to use

@@ -14,6 +14,13 @@ from torch.utils.data.sampler import Sampler
 import models
 
 
+def deserialize_dataset(dataset):
+    print('Deserializing loaded dataset...')
+    with open(dataset, 'rb') as f:
+        x = pickle.load(f)
+    return x
+
+
 def load_model(path):
     """Loads model and return it without DataParallel table."""
     if os.path.isfile(path):
@@ -94,6 +101,7 @@ class UnifLabelSampler(Sampler):
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self):
         self.reset()
 

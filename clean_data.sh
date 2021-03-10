@@ -7,8 +7,10 @@
 #!/bin/bash
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
+EXP="/thecube/students/${USER}/"
+
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 
-${PYTHON} data-cleaner.py ${DATA_DIR} --ann ${ANN_DIR}
+${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --log ${EXP}
 #/miniconda/envs/vmr/bin/python
 

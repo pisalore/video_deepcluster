@@ -1,6 +1,13 @@
 import argparse
-import os
+import datetime
+import pickle
+import logging
 from xml.dom import minidom
+
+import torchvision.transforms as transforms
+
+import preprocessing
+from VidDataLoader import VidDataset
 
 
 def parse_args():
@@ -8,22 +15,16 @@ def parse_args():
         description='Data cleaner for deepcluster. It deletes not annotated images in a vast dataset.')
     parser.add_argument('data', metavar='DATA_DIR', type=str, help='Dir where dataset images are saved.')
     parser.add_argument('ann', metavar='ANN_DIR', type=str, help='Dir where images annotations are saved.')
+    parser.add_argument('--log', metavar='LOG', type=str, default='', help='Dir where useful logs will be saved.')
     return parser.parse_args()
 
 
-def list_files(root_path):
-    """
-    Args:
-        root_path (string): root path of dir to be walked.
-
-    Returns:
-        path_list (list): all path found in walked dir.
-    """
-    path_list = []
-    for path, subdirs, files in os.walk(root_path):
-        for name in files:
-            path_list.append(os.path.join(path, name))
-    return path_list
+def serialize(dataset, tag='vid_dataset'):
+    now = datetime.datetime.now()
+    date_str = f'{now.year}.{now.month}.{now.day}_{now.hour}_{now.minute}_{now.second}'
+    filename = f'{tag}_{date_str}'
+    with open(filename + '.pkl', 'wb') as f:
+        pickle.dump(dataset, f)
 
 
 def parse_annotation(img, ann):
@@ -50,15 +51,23 @@ def parse_annotation(img, ann):
 
 
 def main(args):
-    data, annotations = list_files(args.data), list_files(args.ann)
-    print("Number of images:", len(data), "\nNumber of annotations:", len(annotations))
-    for idx, img in enumerate(data):
-        ann = (args.ann + img.split('/train/')[1]).split('.')[0] + '.xml'
+    logging.basicConfig(filename=args.log + 'clean.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
+
+    tra = [preprocessing.Rescale((224, 224)),
+           preprocessing.ToTensor()]
+    dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
+    not_annotated_imgs_idx = []
+    for idx, img in enumerate(dataset.imgs):
+        ann = (args.ann + img[0].split('/train/')[1]).split('.')[0] + '.xml'
         if not parse_annotation(img, ann):
-            os.remove(img)
-            print("Removed" + img + "\n")
-            print("Analyzed ", idx, "images")
+            not_annotated_imgs_idx.append(idx)
+            logging.info("Removed " + img[0] + "\n")
+            print("Analyzed ", idx+1, "images")
+    for i in sorted(not_annotated_imgs_idx, reverse=True):
+        del dataset.imgs[i]
     print('Task terminated')
+    logging.info("Removed " + str(len(not_annotated_imgs_idx)) + " images.\n")
+    serialize(dataset)
 
 
 if __name__ == '__main__':

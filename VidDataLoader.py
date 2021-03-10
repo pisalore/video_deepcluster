@@ -6,10 +6,9 @@ import torchvision.transforms.functional as TF
 from torchvision.datasets import ImageFolder
 
 
-def parse_annotation(img, ann):
+def parse_annotation(ann):
     """
     Args:
-        img (string): the image to which coordinates are related
         ann: an xml file with bb annotations: xmin, xmax, ymin, ymax
     Returns:
         a list with bb coordinates for a given image.
@@ -25,8 +24,7 @@ def parse_annotation(img, ann):
         return {'x_min': x_min, 'x_max': x_max, 'y_min': y_min, 'y_max': y_max}
 
     except Exception as e:
-        # print("Error:", e.__class__, "occurred for img " + img)
-        # print("Next entry.")
+        print("Error:", e.__class__, "occurred for data " + ann)
         return None
 
 
@@ -42,10 +40,10 @@ def crop(img_path, annotations_dir_path):
          the given image is read as a PIL image to be cropped; the it is converted as a normalized float32 ndarray
          for further manipulation in nn.
     """
-    img = Image.fromarray(io.imread(img_path).astype('uint8'))
     ann_path = (annotations_dir_path + img_path.split('/train/')[1]).split('.')[0]+'.xml'
-    img_crop_coord = parse_annotation(img_path, ann_path)
+    img_crop_coord = parse_annotation(ann_path)
     if img_crop_coord:
+        img = Image.fromarray(io.imread(img_path).astype('uint8'))
         height, width = img_crop_coord['y_max'] - img_crop_coord['y_min'], img_crop_coord['x_max'] - img_crop_coord['x_min']
         img_cropped = TF.crop(img, img_crop_coord['y_min'], img_crop_coord['x_min'], height, width)
         return {'crop': np.array(img_cropped).astype('float32') / 255, 'coords': img_crop_coord}
