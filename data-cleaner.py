@@ -15,7 +15,7 @@ def parse_args():
         description='Data cleaner for deepcluster. It deletes not annotated images in a vast dataset.')
     parser.add_argument('data', metavar='DATA_DIR', type=str, help='Dir where dataset images are saved.')
     parser.add_argument('ann', metavar='ANN_DIR', type=str, help='Dir where images annotations are saved.')
-    parser.add_argument('--log', metavar='LOG', type=str, default='', help='Dir where useful logs will be saved.')
+    parser.add_argument('--output', metavar='LOG', type=str, default='', help='Dir where useful logs will be saved.')
     return parser.parse_args()
 
 
@@ -24,7 +24,7 @@ def serialize(dataset, tag='vid_dataset'):
     now = datetime.datetime.now()
     date_str = f'{now.year}.{now.month}.{now.day}_{now.hour}_{now.minute}_{now.second}'
     filename = f'{tag}_{date_str}'
-    with open(filename + '.pkl', 'wb') as f:
+    with open(args.output+filename + '.pkl', 'wb') as f:
         pickle.dump(dataset, f)
 
 
@@ -52,7 +52,7 @@ def parse_annotation(ann):
 
 def main(args):
     print('Load dataset...')
-    logging.basicConfig(filename=args.log + 'clean.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename=args.output + 'clean.log', filemode='w', level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
     tra = [preprocessing.Rescale((224, 224)),
            preprocessing.ToTensor()]
@@ -71,7 +71,7 @@ def main(args):
         del dataset.imgs[i]
     logging.info("Removed " + str(len(not_annotated_imgs_idx)) + " images.\n")
     serialize(dataset)
-    print('Task terminated. Find log at ' + args.log)
+    print('Task terminated. Find log and pkl file at ' + args.output)
 
 
 if __name__ == '__main__':
