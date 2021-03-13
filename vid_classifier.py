@@ -106,6 +106,7 @@ def main(args):
     model.top_layer.bias.data.zero_()
     model.top_layer.cuda()
 
+    print('Training starts.')
     for epoch in range(args.start_epoch, args.epochs):
         loss = train(train_dataloader, model, criterion, optimizer, epoch)
 
@@ -140,7 +141,7 @@ def train(loader, model, crit, opt, epoch):
         input_var = torch.autograd.Variable(sample['image'].cuda())
         labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
         labels = labels.type(torch.LongTensor).cuda()
-
+        print(labels.size(), input_var.size())
         output = model(input_var)
         loss = crit(output, labels)
 
