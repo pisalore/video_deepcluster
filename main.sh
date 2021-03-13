@@ -22,6 +22,6 @@ BATCH=256
 mkdir -p ${EXP}
 
 CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --load_step ${STEP} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
---lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --lables_pkl ${LABELS} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
+--lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
 
