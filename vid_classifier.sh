@@ -18,6 +18,6 @@ EPOCHS=100
 BATCH=256
 mkdir -p ${EXP}
 
-CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py  --load_step ${STEP} --batch ${BATCH} --arch ${ARCH} \
+CUDA_VISIBLE_DEVICES=0 ${PYTHON}  vid_classifier.py --load_step ${STEP} --batch ${BATCH} --arch ${ARCH} \
 --lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --labels_pkl ${LABELS} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python

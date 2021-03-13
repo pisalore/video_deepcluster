@@ -16,7 +16,7 @@ import numpy as np
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='PyTorch Implementation of DeepCluster')
+    parser = argparse.ArgumentParser(description='Classifier for Vid Dataset')
 
     parser.add_argument('--data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
