@@ -7,7 +7,9 @@
 #!/bin/bash
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
-STEP=5
+PKL="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
+LABELS="/thecube/students/${USER}/labels.pkl"
+STEP=3
 ARCH="alexnet"
 LR=0.05
 WD=-5
@@ -15,11 +17,11 @@ K=300
 WORKERS=12
 EXP="/thecube/students/${USER}/test_step_${STEP}_K_${K}/exp"
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
-EPOCHS=200
+EPOCHS=100
 BATCH=256
 mkdir -p ${EXP}
 
 CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py ${DATA_DIR} --ann ${ANN_DIR} --load_step ${STEP} --batch ${BATCH} --exp ${EXP} --arch ${ARCH} \
-  --lr ${LR} --wd ${WD} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
+--lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --lables_pkl ${LABELS} --k ${K} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
 

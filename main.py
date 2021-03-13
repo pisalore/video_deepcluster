@@ -24,7 +24,7 @@ from VidDataLoader import VidDataset
 
 import clustering
 import models
-from util import AverageMeter, Logger, UnifLabelSampler, deserialize_dataset
+from util import AverageMeter, Logger, UnifLabelSampler, deserialize_obj
 
 
 def parse_args():
@@ -32,7 +32,7 @@ def parse_args():
 
     parser.add_argument('data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
-    parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serielized dataset.')
+    parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serialized dataset.')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
                         help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
@@ -139,7 +139,7 @@ def main(args):
     print('Start loading dataset...')
     end = time.time()
     if args.dataset_pkl:
-        dataset = deserialize_dataset(args.dataset_pkl)
+        dataset = deserialize_obj(args.dataset_pkl)
     else:
         tra = [preprocessing.Rescale((224, 224)),
                preprocessing.ToTensor()]
@@ -200,6 +200,9 @@ def main(args):
             sampler=sampler,
             pin_memory=True,
         )
+
+        if not args.dataset_pkl:
+            train_dataloader.collate_fn = my_collate
 
         # set last fully connected layer
         mlp = list(model.classifier.children())

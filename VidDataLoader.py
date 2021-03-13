@@ -1,9 +1,12 @@
+from typing import Tuple, List, Dict
+
 from skimage import io
 import numpy as np
 from xml.dom import minidom
 from PIL import Image
 import torchvision.transforms.functional as TF
 from torchvision.datasets import ImageFolder
+from pathlib import Path
 
 
 def parse_annotation(ann):
@@ -54,7 +57,7 @@ def crop(img_path, annotations_dir_path):
 class VidDataset(ImageFolder):
     """VID dataset."""
 
-    def __init__(self, xml_annotations_dir: str, root_dir: str, transform=None):
+    def __init__(self, xml_annotations_dir: str, root_dir: str, transform=None, labels=None):
         """
         Args:
             xml_annotations_dir (string): Path to the dir with images annotations.
@@ -67,6 +70,8 @@ class VidDataset(ImageFolder):
         """
         super().__init__(root_dir, transform)
         self.annotations_dir = xml_annotations_dir
+        if labels:
+            self.vid_labels = labels
 
     def __len__(self):
         return len(self.imgs)
@@ -75,7 +80,12 @@ class VidDataset(ImageFolder):
         cropped_image = crop(self.imgs[idx][0], self.annotations_dir)
         if cropped_image is not None:
             crop_coords = np.array(list(cropped_image['coords'].values())).astype('float32')
-            sample = {'image': cropped_image['crop'], 'crop_coord': crop_coords, 'name': self.imgs[idx][0]}
+            label = self.vid_labels['/'.join(Path(self.imgs[idx][0]).parent.parts[-2:])]
+            sample = {'image': cropped_image['crop'],
+                      'crop_coord': crop_coords,
+                      'name': self.imgs[idx][0],
+                      'video': Path(self.imgs[idx][0]).parent.parts[-1],
+                      'label': label}
 
             if self.transform:
                 sample = self.transform(sample)

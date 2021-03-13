@@ -14,9 +14,9 @@ from torch.utils.data.sampler import Sampler
 import models
 
 
-def deserialize_dataset(dataset):
-    print('Deserializing loaded dataset...')
-    with open(dataset, 'rb') as f:
+def deserialize_obj(obj):
+    print('Deserializing loaded ' + obj + '...')
+    with open(obj, 'rb') as f:
         x = pickle.load(f)
     return x
 
