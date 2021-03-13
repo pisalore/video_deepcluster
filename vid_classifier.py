@@ -18,7 +18,7 @@ import numpy as np
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of DeepCluster')
 
-    parser.add_argument('data', metavar='DIR', help='path to dataset')
+    parser.add_argument('--data', metavar='DIR', help='path to dataset')
     parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
     parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serialized dataset.')
     parser.add_argument('--labels_pkl', metavar='LABELS', help='path to serialized labels.')
@@ -106,7 +106,7 @@ def main(args):
     model.top_layer.bias.data.zero_()
     model.top_layer.cuda()
 
-    for epoch in range(50):
+    for epoch in range(args.start_epoch, args.epochs):
         loss = train(train_dataloader, model, criterion, optimizer, epoch)
 
 
