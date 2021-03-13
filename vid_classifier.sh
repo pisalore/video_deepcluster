@@ -21,8 +21,3 @@ mkdir -p ${EXP}
 CUDA_VISIBLE_DEVICES=0 ${PYTHON} main.py  --load_step ${STEP} --batch ${BATCH} --arch ${ARCH} \
 --lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --labels_pkl ${LABELS} --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
-
-
-
-
-C:/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/ --ann C:/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/ --load_step 100 --exp test/exp --arch alexnet --dataset_pkl vid_dataset_small.pkl --labels_pkl labels.pkl --lr 0.05 --wd -5 --sobel --verbose --workers 12
