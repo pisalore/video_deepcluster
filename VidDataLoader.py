@@ -70,8 +70,7 @@ class VidDataset(ImageFolder):
         """
         super().__init__(root_dir, transform)
         self.annotations_dir = xml_annotations_dir
-        if labels:
-            self.vid_labels = labels
+        self.vid_labels = labels
 
     def __len__(self):
         return len(self.imgs)
@@ -80,7 +79,10 @@ class VidDataset(ImageFolder):
         cropped_image = crop(self.imgs[idx][0], self.annotations_dir)
         if cropped_image is not None:
             crop_coords = np.array(list(cropped_image['coords'].values())).astype('float32')
-            label = self.vid_labels['/'.join(Path(self.imgs[idx][0]).parent.parts[-2:])]
+            if self.vid_labels is not None:
+                label = self.vid_labels['/'.join(Path(self.imgs[idx][0]).parent.parts[-2:])]
+            else:
+                label = -1
             sample = {'image': cropped_image['crop'],
                       'crop_coord': crop_coords,
                       'name': self.imgs[idx][0],

@@ -140,11 +140,12 @@ def main(args):
     end = time.time()
     if args.dataset_pkl:
         dataset = deserialize_obj(args.dataset_pkl)
+        # I will never use labels in deepcluster
+        dataset.vid_labels = None
     else:
         tra = [preprocessing.Rescale((224, 224)),
                preprocessing.ToTensor()]
         dataset = VidDataset(xml_annotations_dir=args.ann, root_dir=args.data, transform=transforms.Compose(tra))
-
     dataset.imgs = dataset.imgs[0::args.load_step]
     dataset.samples = dataset.samples[0::args.load_step]
     print('Load dataset: {0:.2f} s'.format(time.time() - end))
