@@ -63,7 +63,6 @@ def main(args):
     model = models.__dict__[args.arch](sobel=args.sobel)
     fd = int(model.top_layer.weight.size()[1])
     model.top_layer = None
-    # model.features = torch.nn.DataParallel(model.features)
     model.cuda()
     cudnn.benchmark = True
 

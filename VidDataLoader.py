@@ -87,7 +87,7 @@ class VidDataset(ImageFolder):
                       'crop_coord': crop_coords,
                       'name': self.imgs[idx][0],
                       'video': Path(self.imgs[idx][0]).parent.parts[-1],
-                      'label': int(label)}
+                      'label': int(label-1)}
 
             if self.transform:
                 sample = self.transform(sample)
