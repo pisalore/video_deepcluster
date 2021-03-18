@@ -138,10 +138,10 @@ def train(loader, model, crit, opt, epoch):
     for i, sample in enumerate(loader):
         data_time.update(time.time() - end)
 
+        print('Debug. Sample image size: ', sample['image'].shape)
         input_var = torch.autograd.Variable(sample['image'].cuda())
         labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
         labels = labels.type(torch.LongTensor).cuda()
-        print(labels.size(), input_var.size())
         output = model(input_var)
         loss = crit(output, labels)
 
