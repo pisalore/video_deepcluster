@@ -10,7 +10,7 @@ import torch.optim
 import torch.utils.data
 from torch.utils.data import DataLoader
 
-from util import deserialize_obj, AverageMeter
+from util import deserialize_obj, AverageMeter, Logger
 import models
 
 import numpy as np
@@ -56,6 +56,8 @@ def parse_args():
 
 
 def main(args):
+    # logger
+    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
     # fix random seeds
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
@@ -120,6 +122,8 @@ def main(args):
         print('###### Epoch [{0}] ###### \n'
               'Loss: {1:.3f}'
               .format(epoch, loss))
+
+        epochs_log.log([epoch, loss])
 
         # save model
         torch.save({'epoch': epoch + 1,
