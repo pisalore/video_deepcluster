@@ -74,7 +74,7 @@ def main(args):
     fd = int(model.top_layer.weight.size()[1])
     model.cuda()
     cudnn.benchmark = True
-
+    print('Correctly loaded pretrained model', args.model)
     # set last fully connected layer
     mlp = list(model.classifier.children())
     mlp.append(nn.ReLU(inplace=False).cuda())
