@@ -7,7 +7,6 @@
 #!/bin/bash
 PKL="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
 LABELS="/thecube/students/${USER}/labels.pkl"
-PRE_TRAINED_MODEL="/thecube/students/${USER}/test_step_${STEP}_K_${K}/exp/model_s3k300.pth.tar"
 NUM_OUT_CLASSES=30
 
 STEP=3
@@ -17,6 +16,7 @@ LR=0.05
 WD=-5
 WORKERS=12
 EXP="/thecube/students/${USER}/test_step_${STEP}_K_${K}/exp/fine_tuning"
+PRE_TRAINED_MODEL="/thecube/students/${USER}/test_step_${STEP}_K_${K}/exp/model_s3k300.pth.tar"
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 EPOCHS=100
 BATCH=256
