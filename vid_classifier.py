@@ -147,6 +147,7 @@ def train(loader, model, crit, opt, epoch):
         loss = crit(output, labels)
 
         # record loss
+        print('Debug. Input loss data shape: ', input_var.size(0))
         losses.update(loss.data, input_var.size(0))
 
         # compute gradient and do SGD step
