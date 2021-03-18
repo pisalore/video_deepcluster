@@ -1,3 +1,4 @@
+import time
 from typing import Tuple, List, Dict
 
 from skimage import io
@@ -77,6 +78,7 @@ class VidDataset(ImageFolder):
         return len(self.imgs)
 
     def __getitem__(self, idx):
+        end = time.time()
         cropped_image = crop(self.imgs[idx][0], self.annotations_dir)
         if cropped_image is not None:
             crop_coords = np.array(list(cropped_image['coords'].values())).astype('float32')
@@ -92,7 +94,7 @@ class VidDataset(ImageFolder):
 
             if self.transform:
                 sample = self.transform(sample)
-
+            print('Img loading time:', time.time() - end)
             return sample
         else:
             return None
