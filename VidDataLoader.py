@@ -43,11 +43,12 @@ def crop(img_path, annotations_dir_path):
          the given image is read as a PIL image to be cropped; the it is converted as a normalized float32 ndarray
          for further manipulation in nn.
     """
-    ann_path = (annotations_dir_path + img_path.split('/train/')[1]).split('.')[0]+'.xml'
+    ann_path = (annotations_dir_path + img_path.split('/train/')[1]).split('.')[0] + '.xml'
     img_crop_coord = parse_annotation(ann_path)
     if img_crop_coord:
         img = Image.fromarray(io.imread(img_path).astype('uint8'))
-        height, width = img_crop_coord['y_max'] - img_crop_coord['y_min'], img_crop_coord['x_max'] - img_crop_coord['x_min']
+        height, width = img_crop_coord['y_max'] - img_crop_coord['y_min'], img_crop_coord['x_max'] - img_crop_coord[
+            'x_min']
         img_cropped = TF.crop(img, img_crop_coord['y_min'], img_crop_coord['x_min'], height, width)
         return {'crop': np.array(img_cropped).astype('float32') / 255, 'coords': img_crop_coord}
     else:
@@ -87,7 +88,7 @@ class VidDataset(ImageFolder):
                       'crop_coord': crop_coords,
                       'name': self.imgs[idx][0],
                       'video': Path(self.imgs[idx][0]).parent.parts[-1],
-                      'label': int(label)-1}
+                      'label': int(label) - 1}  # classes are from 0 to 29
 
             if self.transform:
                 sample = self.transform(sample)
@@ -95,6 +96,3 @@ class VidDataset(ImageFolder):
             return sample
         else:
             return None
-
-
-

@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 
 import torch
@@ -18,12 +19,15 @@ import numpy as np
 def parse_args():
     parser = argparse.ArgumentParser(description='Classifier for Vid Dataset')
 
-    parser.add_argument('--data', metavar='DIR', help='path to dataset')
-    parser.add_argument('--ann', metavar='ANN_DIR', help='path to annotations')
     parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serialized dataset.')
     parser.add_argument('--labels_pkl', metavar='LABELS', help='path to serialized labels.')
+    parser.add_argument('--model', metavar='PRETRAINED_MODEL', help='path to video deepcluster pretrained model.')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
                         help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
+    parser.add_argument('--k', type=int, default=300,
+                        help='number of cluster obtained from for k-means in video deepcluster (default: 300)')
+    parser.add_argument('--out_classes', type=int, default=30,
+                        help='number of desired prediction output classes (default: 30, VidDataset)')
     parser.add_argument('--arch', '-a', type=str, metavar='ARCH',
                         choices=['alexnet', 'vgg16'], default='alexnet',
                         help='CNN architecture (default: alexnet)')
@@ -61,10 +65,24 @@ def main(args):
     if args.verbose:
         print('Architecture: {}'.format(args.arch))
     model = models.__dict__[args.arch](sobel=args.sobel)
+    # top layer has a (4096, k) shape, where k is the number of cluster set in video deepcluster routine. It must be inserted in order
+    # to correctly load model
+    model.top_layer = nn.Linear(4096, args.k)
+    model.features = torch.nn.DataParallel(model.features)
+    checkpoint = torch.load(args.model)
+    model.load_state_dict(checkpoint['state_dict'])
     fd = int(model.top_layer.weight.size()[1])
-    model.top_layer = None
     model.cuda()
     cudnn.benchmark = True
+
+    # set last fully connected layer
+    mlp = list(model.classifier.children())
+    mlp.append(nn.ReLU(inplace=False).cuda())
+    model.classifier = nn.Sequential(*mlp)
+    model.top_layer = nn.Linear(fd, args.out_classes)
+    model.top_layer.weight.data.normal_(0, 0.01)
+    model.top_layer.bias.data.zero_()
+    model.top_layer.cuda()
 
     print('CNN builded.')
 
@@ -96,18 +114,19 @@ def main(args):
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
 
-    # set last fully connected layer
-    mlp = list(model.classifier.children())
-    mlp.append(nn.ReLU(inplace=False).cuda())
-    model.classifier = nn.Sequential(*mlp)
-    model.top_layer = nn.Linear(fd, 30)
-    model.top_layer.weight.data.normal_(0, 0.01)
-    model.top_layer.bias.data.zero_()
-    model.top_layer.cuda()
-
     print('Training starts.')
     for epoch in range(args.start_epoch, args.epochs):
         loss = train(train_dataloader, model, criterion, optimizer, epoch)
+        print('###### Epoch [{0}] ###### \n'
+              'Loss: {1:.3f}'
+              .format(epoch, loss))
+
+        # save model
+        torch.save({'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': optimizer.state_dict()},
+                   os.path.join(args.exp, 'fine_tuning.pth.tar'))
 
 
 def train(loader, model, crit, opt, epoch):
@@ -135,22 +154,15 @@ def train(loader, model, crit, opt, epoch):
 
     end = time.time()
     for i, sample in enumerate(loader):
-        print('sample num:', i)
-        print('Images', len(sample['image']))
-        print('Labels', len(sample['label']))
         data_time.update(time.time() - end)
 
         input_var = torch.autograd.Variable(sample['image'].cuda())
-        print('Debug. input var size: ', input_var.shape)
         labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
         labels = labels.type(torch.LongTensor).cuda()
-        print('Debug. Sample image size: ', sample['image'].shape)
-        print('Debug. Number of labels: ', sample['label'].shape)
         output = model(input_var)
         loss = crit(output, labels)
 
         # record loss
-        print('Debug. Input loss data shape: ', input_var.size(0), '\n')
         losses.update(loss.data, input_var.size(0))
 
         # compute gradient and do SGD step
