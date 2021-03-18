@@ -180,7 +180,7 @@ def train(loader, model, crit, opt, epoch):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if args.verbose and (i % 200) == 0:
+        if args.verbose and (i % 100) == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Loss: {loss.val:.4f} ({loss.avg:.4f})'
                   .format(epoch, i, len(loader), loss=losses))
