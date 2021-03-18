@@ -158,6 +158,7 @@ def train(loader, model, crit, opt, epoch):
 
     end = time.time()
     for i, sample in enumerate(loader):
+        print('Batch num: ', i)
         data_time.update(time.time() - end)
 
         input_var = torch.autograd.Variable(sample['image'].cuda())
