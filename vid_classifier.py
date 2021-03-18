@@ -136,6 +136,9 @@ def train(loader, model, crit, opt, epoch):
 
     end = time.time()
     for i, sample in enumerate(loader):
+        print('sample num:', i)
+        print('Images', sample['image'])
+        print('Labels', sample['label'])
         data_time.update(time.time() - end)
 
         input_var = torch.autograd.Variable(sample['image'].cuda())
@@ -143,12 +146,12 @@ def train(loader, model, crit, opt, epoch):
         labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
         labels = labels.type(torch.LongTensor).cuda()
         print('Debug. Sample image size: ', sample['image'].shape)
-        print('Debug. Number of labels: ', sample['label'].shape, '\n')
+        print('Debug. Number of labels: ', sample['label'].shape)
         output = model(input_var)
         loss = crit(output, labels)
 
         # record loss
-        print('Debug. Input loss data shape: ', input_var.size(0))
+        print('Debug. Input loss data shape: ', input_var.size(0), '\n')
         losses.update(loss.data, input_var.size(0))
 
         # compute gradient and do SGD step
