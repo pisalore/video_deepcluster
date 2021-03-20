@@ -12,6 +12,6 @@ EXP="/thecube/students/${USER}/"
 
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 
-${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --output ${EXP} --data_type
+${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --output ${EXP} --data_type ${DATA_TYPE}
 #/miniconda/envs/vmr/bin/python
 
