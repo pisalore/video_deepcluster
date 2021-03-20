@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+from copy import deepcopy
 
 import torch
 import torch.nn as nn
@@ -10,10 +11,12 @@ import torch.optim
 import torch.utils.data
 from torch.utils.data import DataLoader
 
+from VidDataLoader import VidDataset
 from util import deserialize_obj, AverageMeter, Logger
 import models
 
 import numpy as np
+from torchsummary import summary
 
 
 def parse_args():
@@ -55,9 +58,11 @@ def parse_args():
     return parser.parse_args()
 
 
+# percentage data of validation set wrt training set (374133 to 1122397)
+VALIDATION_PERC = 15
+
+
 def main(args):
-    # logger
-    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
     # fix random seeds
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
@@ -102,52 +107,59 @@ def main(args):
 
     # Labels: they have been added in a second moment, with another processing of ImageSets files inside VID dataset.
     print('Start loading dataset...')
-    train_dataset, labels = None, None
+    complete_dataset, val_dataset, labels = None, None, None
     if args.labels_pkl:
         labels = deserialize_obj(args.labels_pkl)
 
     # Dataset: Get dataset from serialized object
-    train_dataset = deserialize_obj(args.dataset_pkl)
+    complete_dataset = deserialize_obj(args.dataset_pkl)
+    complete_dataset.vid_labels = labels
 
-    # Dataset manipulation and labels assignment
-    train_dataset.imgs = train_dataset.imgs[0::args.load_step]
-    train_dataset.samples = train_dataset.samples[0::args.load_step]
-    train_dataset.vid_labels = labels
+    # Dataset manipulation and labels assignment (both for train and val)
+    train_dataset = deepcopy(complete_dataset)
+    train_dataset.imgs = complete_dataset.imgs[0::args.load_step]
+    train_dataset.samples = complete_dataset.samples[0::args.load_step]
 
+    # val dataset. Since there are not labels for the original one, training set is used, considering images which
+    # are not in training set.
+    val_dataset = deepcopy(complete_dataset)
+    remaining_imgs = list(set(complete_dataset.imgs) - set(train_dataset.imgs))
+    remaining_samples = list(set(complete_dataset.samples) - set(train_dataset.samples))
+    val_step = len(remaining_imgs) // (len(train_dataset.imgs) * VALIDATION_PERC // 100)
+
+    val_dataset.imgs = remaining_imgs[0::val_step]
+    val_dataset.samples = remaining_samples[0::val_step]
+
+    print("Training set dimension: {0}\n"
+          "Validation set dimension: {1}\n".format(len(train_dataset.imgs), len(val_dataset.imgs)))
+
+    # Dataloaders
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch, shuffle=True)
 
     print('Training starts.')
-    for epoch in range(args.start_epoch, args.epochs):
-        loss = train(train_dataloader, model, criterion, optimizer, epoch)
-        print('###### Epoch [{0}] ###### \n'
-              'Loss: {1:.3f}'
-              .format(epoch, loss))
-
-        epochs_log.log([epoch, loss])
-
-        # save model
-        torch.save({'epoch': epoch + 1,
-                    'arch': args.arch,
-                    'state_dict': model.state_dict(),
-                    'optimizer': optimizer.state_dict()},
-                   os.path.join(args.exp, 'fine_tuning.pth.tar'))
+    dataloaders = {'train': train_dataloader, 'val': val_dataloader}
+    since = time.time()
+    train(dataloaders, model, criterion, optimizer)
+    print('Elapsed time: {} '.format(time.time() - since))
 
 
-def train(loader, model, crit, opt, epoch):
+def train(data_loaders, model, crit, opt):
     """Training of the CNN.
         Args:
-            loader (torch.utils.data.DataLoader): Data loader
+            @param data_loaders: (torch.utils.data.DataLoader) Dataloaders dict for train and val phases
             model (nn.Module): CNN
             crit (torch.nn): loss
             opt (torch.optim.SGD): optimizer for every parameters with True
                                    requires_grad in model except top layer
             epoch (int)
     """
-    # switch to train mode
-    model.train()
-    losses = AverageMeter()
-    batch_time = AverageMeter()
-    data_time = AverageMeter()
+    # logger
+    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
+    val_acc_history = []
+
+    best_model_wts = deepcopy(model.state_dict())
+    best_acc = 0.0
 
     # create an optimizer for the last fc layer
     optimizer_tl = torch.optim.SGD(
@@ -156,37 +168,69 @@ def train(loader, model, crit, opt, epoch):
         weight_decay=10 ** args.wd,
     )
 
-    end = time.time()
-    for i, sample in enumerate(loader):
-        data_time.update(time.time() - end)
+    for epoch in range(args.start_epoch, args.epochs):
+        losses = AverageMeter()
+        print('\n')
+        print('Epoch {}/{}'.format(epoch, args.epochs))
+        print('-' * 10)
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                # training mode
+                model.train()
+            else:
+                # evaluate mode
+                model.eval()
 
-        input_var = torch.autograd.Variable(sample['image'].cuda())
-        labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
-        labels = labels.type(torch.LongTensor).cuda()
-        output = model(input_var)
-        loss = crit(output, labels)
+            running_loss = 0.0
+            running_corrects = 0
 
-        # record loss
-        losses.update(loss.data, input_var.size(0))
+            for i, sample in enumerate(data_loaders[phase]):
+                input_var = torch.autograd.Variable(sample['image'].cuda())
+                labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
+                labels = labels.type(torch.LongTensor).cuda()
 
-        # compute gradient and do SGD step
-        opt.zero_grad()
-        optimizer_tl.zero_grad()
-        loss.backward()
-        opt.step()
-        optimizer_tl.step()
+                with torch.set_grad_enabled(phase == 'train'):
+                    if phase == 'train':
+                        output = model(input_var)
+                        loss = crit(output, labels)
+                        _, preds = torch.max(output, 1)
+                        # compute gradient and do SGD step
+                        opt.zero_grad()
+                        optimizer_tl.zero_grad()
+                        loss.backward()
+                        opt.step()
+                        optimizer_tl.step()
 
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        print('Batch time:', batch_time.avg)
-        end = time.time()
+                # record loss
+                losses.update(loss.data, input_var.size(0))
+                running_loss += loss.item() * input_var.size(0)
+                running_corrects += torch.sum(preds == labels.data)
 
-        if args.verbose and (i % 100) == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Loss: {loss.val:.4f} ({loss.avg:.4f})'
-                  .format(epoch, i, len(loader), loss=losses))
+                if args.verbose and phase == 'train':
+                    print('Epoch: [{0}][{1}/{2}]\n'
+                          'Running loss:: {loss:.4f} \n'
+                          'Running corrects: ({corrects:.4f})'
+                          .format(epoch, i, len(data_loaders['train']), loss=running_loss, corrects=running_corrects))
 
-    return losses.avg
+            epoch_loss = running_loss / len(data_loaders[phase].dataset)
+            epoch_acc = running_corrects.double() / len(data_loaders[phase].dataset)
+
+            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+
+            # deep copy the model
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+                best_model_wts = deepcopy(model.state_dict())
+            if phase == 'val':
+                val_acc_history.append(epoch_acc)
+
+        epochs_log.log([epoch, epoch_loss, epoch_acc])
+
+        torch.save({'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'optimizer': opt.state_dict()},
+                   os.path.join(args.exp, 'fine_tuning.pth.tar'))
 
 
 if __name__ == '__main__':
