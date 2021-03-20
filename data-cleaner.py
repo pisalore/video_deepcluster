@@ -15,6 +15,8 @@ def parse_args():
         description='Data cleaner for deepcluster. It deletes not annotated images in a vast dataset.')
     parser.add_argument('data', metavar='DATA_DIR', type=str, help='Dir where dataset images are saved.')
     parser.add_argument('ann', metavar='ANN_DIR', type=str, help='Dir where images annotations are saved.')
+    parser.add_argument('--data_type', metavar='DATA_TYPE', type=str, default='train',
+                        help='Data type to be cleaned; it must match data dir name. For example: train, val. Default: train.')
     parser.add_argument('--output', metavar='LOG', type=str, default='', help='Dir where useful logs will be saved.')
     return parser.parse_args()
 
@@ -61,7 +63,7 @@ def main(args):
     print('Clean dataset...\n')
     not_annotated_imgs_idx = []
     for idx, img in enumerate(dataset.imgs):
-        ann = (args.ann + img[0].split('/train/')[1]).split('.')[0] + '.xml'
+        ann = (args.ann + img[0].split('/' + args.data_type + '/')[1]).split('.')[0] + '.xml'
         if not parse_annotation(ann):
             not_annotated_imgs_idx.append(idx)
             logging.info("Removed " + img[0] + "\n")

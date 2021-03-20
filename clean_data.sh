@@ -5,12 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
-ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
+DATA_TYPE="val"
+DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/${DATA_TYPE}/"
+ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/${DATA_TYPE}/"
 EXP="/thecube/students/${USER}/"
 
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 
-${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --output ${EXP}
+${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} --output ${EXP} --data_type
 #/miniconda/envs/vmr/bin/python
 
