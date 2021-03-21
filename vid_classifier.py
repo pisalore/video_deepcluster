@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 import time
 from copy import deepcopy
 
@@ -10,13 +11,10 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 from torch.utils.data import DataLoader
+import numpy as np
 
-from VidDataLoader import VidDataset
 from util import deserialize_obj, AverageMeter, Logger
 import models
-
-import numpy as np
-from torchsummary import summary
 
 
 def parse_args():
@@ -140,7 +138,9 @@ def main(args):
     print('Training starts.')
     dataloaders = {'train': train_dataloader, 'val': val_dataloader}
     since = time.time()
-    train(dataloaders, model, criterion, optimizer)
+    val_acc_history = train(dataloaders, model, criterion, optimizer)
+    with open(os.path.join(args.exp, 'val_acc_history.pkl'), 'wb') as f:
+        pickle.dump(val_acc_history, f)
     print('Elapsed time: {} '.format(time.time() - since))
 
 
@@ -158,7 +158,6 @@ def train(data_loaders, model, crit, opt):
     epochs_log = Logger(os.path.join(args.exp, 'epochs'))
     val_acc_history = []
 
-    best_model_wts = deepcopy(model.state_dict())
     best_acc = 0.0
 
     # create an optimizer for the last fc layer
@@ -171,7 +170,7 @@ def train(data_loaders, model, crit, opt):
     for epoch in range(args.start_epoch, args.epochs):
         losses = AverageMeter()
         print('\n')
-        print('Epoch {}/{}'.format(epoch, args.epochs))
+        print('Epoch {}/{}'.format(epoch+1, args.epochs))
         print('-' * 10)
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -190,10 +189,12 @@ def train(data_loaders, model, crit, opt):
                 labels = labels.type(torch.LongTensor).cuda()
 
                 with torch.set_grad_enabled(phase == 'train'):
+
+                    output = model(input_var)
+                    loss = crit(output, labels)
+                    _, preds = torch.max(output, 1)
+
                     if phase == 'train':
-                        output = model(input_var)
-                        loss = crit(output, labels)
-                        _, preds = torch.max(output, 1)
                         # compute gradient and do SGD step
                         opt.zero_grad()
                         optimizer_tl.zero_grad()
@@ -209,8 +210,8 @@ def train(data_loaders, model, crit, opt):
                 if args.verbose and phase == 'train':
                     print('Epoch: [{0}][{1}/{2}]\n'
                           'Running loss:: {loss:.4f} \n'
-                          'Running corrects: ({corrects:.4f})'
-                          .format(epoch, i, len(data_loaders['train']), loss=running_loss, corrects=running_corrects))
+                          'Running corrects: ({corrects:.4f}) \n'
+                          .format(epoch+1, i+1, len(data_loaders['train']), loss=(loss.item() * input_var.size(0)), corrects=(torch.sum(preds == labels.data))))
 
             epoch_loss = running_loss / len(data_loaders[phase].dataset)
             epoch_acc = running_corrects.double() / len(data_loaders[phase].dataset)
@@ -220,17 +221,18 @@ def train(data_loaders, model, crit, opt):
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
-                best_model_wts = deepcopy(model.state_dict())
             if phase == 'val':
                 val_acc_history.append(epoch_acc)
 
-        epochs_log.log([epoch, epoch_loss, epoch_acc])
+        epochs_log.log([epoch+1, epoch_loss, epoch_acc])
 
         torch.save({'epoch': epoch + 1,
                     'arch': args.arch,
                     'state_dict': model.state_dict(),
                     'optimizer': opt.state_dict()},
                    os.path.join(args.exp, 'fine_tuning.pth.tar'))
+
+    return val_acc_history
 
 
 if __name__ == '__main__':
