@@ -20,7 +20,7 @@ from torch.utils.data.dataloader import default_collate
 import torchvision.transforms as transforms
 
 import preprocessing
-from VidDataLoader import VidDataset
+from datasets.VidDataLoader import VidDataset
 
 import clustering
 import models
