@@ -5,11 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-DATA_TYPE="train"
 DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/${DATA_TYPE}/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/${DATA_TYPE}/"
 LBL_TXT="/home/${USER}/video_deepcluster/map_vid.txt"
 EXP="/thecube/students/${USER}/"
+DATA_TYPE="train"
 
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 

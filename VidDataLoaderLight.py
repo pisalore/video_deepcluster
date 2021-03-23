@@ -11,16 +11,18 @@ class VidDatasetLight(ImageFolder):
         (for example, using an offline preprocessing procedure) trying to speed up vid classification.
     """
 
-    def __init__(self, root_dir: str, transform=None, labels=None):
+    def __init__(self, root_dir: str, transform=None, labels=None, crop_coords=None):
         """
         Args:
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
-            labels data labels
+            labels data labels from VID annotations
+            crop_coords a dictionary with image crop coordinates from VID annotations
         """
         super().__init__(root_dir, transform)
         self.vid_labels = labels
+        self.crop_coords = crop_coords
 
     def __len__(self):
         return len(self.imgs)
@@ -29,7 +31,7 @@ class VidDatasetLight(ImageFolder):
         img_name = self.imgs[idx][0]
         image = torch.from_numpy(io.imread(img_name).astype('float32') / 255)
         if self.vid_labels is not None:
-            label = self.vid_labels['/'.join(Path(self.imgs[idx][0]).parent.parts[-2:])]
+            label = self.vid_labels[img_name]
         else:
             label = -1
         sample = {'image': image,

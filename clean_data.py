@@ -7,7 +7,6 @@ from xml.dom import minidom
 import torchvision.transforms as transforms
 
 import preprocessing
-from VidDataLoader import VidDataset
 from VidDataLoaderLight import VidDatasetLight
 
 
@@ -50,16 +49,16 @@ def parse_annotation(ann):
                       'ymin': int(xml.getElementsByTagName('ymin')[0].firstChild.data),
                       'ymax': int(xml.getElementsByTagName('ymax')[0].firstChild.data)
                       }
-        label = xml.getElementsByTagName('name')[0].firstChild.data
+        label = str(xml.getElementsByTagName('name')[0].firstChild.data)
         return crop_coord, label
 
     except Exception:
-        return False
+        return None, None
 
 
 def main(args):
     print('Load dataset...')
-    logging.basicConfig(filename=args.output + 'clean.log', filemode='w', level=logging.INFO,
+    logging.basicConfig(filename=args.output + 'clean_{}.log'.format(args.data_type), filemode='w', level=logging.INFO,
                         format='%(name)s - %(levelname)s - %(message)s')
 
     # Prepare dataset
@@ -67,30 +66,38 @@ def main(args):
            preprocessing.ToTensor()]
     dataset = VidDatasetLight(root_dir=args.data, transform=transforms.Compose(tra))
 
-    # Prepare labels
-    labels = {}
+    # Prepare labels and crop coords structures
+    labels, dataset_labels, dataset_crop_coords = {}, {}, {}
     with open(args.labels_txt, 'r') as f:
         for line in f:
             lbl = line.rstrip().split(' ')
             labels[lbl[0]] = {'code': lbl[1], 'class': lbl[2]}
 
-    print('Dataset loaded.\n')
+    print('Dataset and labels loaded.\n')
     print('Clean dataset...\n')
     not_annotated_imgs_idx = []
+
+    # save images information (labels and bb coordinates) and discard erroneous samples
     for idx, img in enumerate(dataset.imgs):
         ann = (args.ann + img[0].split('/' + args.data_type + '/')[1]).split('.')[0] + '.xml'
-        crop_coord, label = parse_annotation(ann)
-        if False in (crop_coord, label):
+        img_crop_coords, img_label_name = parse_annotation(ann)
+        if None in (img_crop_coords, img_label_name):
             not_annotated_imgs_idx.append(idx)
             logging.info("Removed " + img[0] + "\n")
         else:
-            pass
+            dataset_labels[img] = labels[img_label_name]
+            dataset_crop_coords[img] = img_crop_coords
         if not (idx + 1) % 1000:
             print("Analyzed ", idx + 1, "images")
     for i in sorted(not_annotated_imgs_idx, reverse=True):
         del dataset.imgs[i]
     logging.info("Removed " + str(len(not_annotated_imgs_idx)) + " images.\n")
-    serialize(dataset, tag='vid_dataset' + args.data_type)
+
+    # Complete dataset definition with labels and crop coordinates
+    dataset.vid_labels = dataset_labels
+    dataset.crop_coords = dataset_crop_coords
+
+    serialize(dataset, tag='vid_dataset_' + args.data_type)
     print('Task terminated. Find log and pkl file at ' + args.output)
 
 
