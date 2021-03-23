@@ -85,8 +85,8 @@ def main(args):
             not_annotated_imgs_idx.append(idx)
             logging.info("Removed " + img[0] + "\n")
         else:
-            dataset_labels[img] = labels[img_label_name]
-            dataset_crop_coords[img] = img_crop_coords
+            dataset_labels[img[0]] = labels[img_label_name]
+            dataset_crop_coords[img[0]] = img_crop_coords
         if not (idx + 1) % 1000:
             print("Analyzed ", idx + 1, "images")
     for i in sorted(not_annotated_imgs_idx, reverse=True):

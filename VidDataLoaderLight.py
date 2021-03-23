@@ -34,9 +34,16 @@ class VidDatasetLight(ImageFolder):
             label = self.vid_labels[img_name]
         else:
             label = -1
+        if self.crop_coords is not None:
+            crop_coords = self.crop_coords[img_name]
+        else:
+            crop_coords = None
+
         sample = {'image': image,
-                  'name': self.imgs[idx][0],
-                  'label': int(label) - 1}  # classes are from 0 to 29
+                  'name': Path(self.imgs[idx][0]),
+                  'label': label,  # classes are from 0 to 29
+                  'crop_coords' : crop_coords
+                  }
 
         if self.transform:
             sample = self.transform(sample)
