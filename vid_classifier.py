@@ -123,10 +123,8 @@ def main(args):
     val_dataset = deepcopy(complete_dataset)
     remaining_imgs = list(set(complete_dataset.imgs) - set(train_dataset.imgs))
     remaining_samples = list(set(complete_dataset.samples) - set(train_dataset.samples))
-    val_step = len(remaining_imgs) // (len(train_dataset.imgs) * VALIDATION_PERC // 100)
-
-    val_dataset.imgs = remaining_imgs[0::val_step]
-    val_dataset.samples = remaining_samples[0::val_step]
+    train_dataset.imgs = remaining_imgs
+    train_dataset.samples = remaining_samples
 
     print("Training set dimension: {0}\n"
           "Validation set dimension: {1}\n".format(len(train_dataset.imgs), len(val_dataset.imgs)))
