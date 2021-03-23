@@ -13,6 +13,6 @@ DATA_TYPE="train"
 
 PYTHON="/home/${USER}/miniconda/envs/vmr/bin/python"
 
-${PYTHON} data-cleaner.py ${DATA_DIR} ${ANN_DIR} ${LBL_TXT} --output ${EXP} --data_type ${DATA_TYPE}
+${PYTHON} clean_data.py ${DATA_DIR} ${ANN_DIR} ${LBL_TXT} --output ${EXP} --data_type ${DATA_TYPE}
 #/miniconda/envs/vmr/bin/python
 
