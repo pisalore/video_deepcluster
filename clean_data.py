@@ -7,7 +7,7 @@ from xml.dom import minidom
 import torchvision.transforms as transforms
 
 import preprocessing
-from datasets.VidDataLoader import VidDataset
+from VidDataLoader import VidDataset
 
 
 def parse_args():

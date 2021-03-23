@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--labels_pkl', metavar='LABELS', help='path to serialized labels.')
     parser.add_argument('--model', metavar='PRETRAINED_MODEL', help='path to video deepcluster pretrained model.')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
-                        help='step by which lodead images from Data folder. Default: 1 (each image will be loaded.')
+                        help='step by which load images from Data folder. Default: 1 (each image will be loaded.')
     parser.add_argument('--k', type=int, default=300,
                         help='number of cluster obtained from for k-means in video deepcluster (default: 300)')
     parser.add_argument('--out_classes', type=int, default=30,
@@ -207,7 +207,7 @@ def train(data_loaders, model, crit, opt):
                 running_loss += loss.item() * input_var.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
-                if args.verbose and phase == 'train':
+                if args.verbose:
                     print('Epoch: [{0}][{1}/{2}]\n'
                           'Running loss:: {loss:.4f} \n'
                           'Running corrects: ({corrects:.4f}) \n'
@@ -218,14 +218,14 @@ def train(data_loaders, model, crit, opt):
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
-            # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
             if phase == 'val':
-                val_acc_history.append(epoch_acc)
+                val_acc_history.append([epoch_loss, epoch_acc])
 
-        epochs_log.log([epoch+1, epoch_loss, epoch_acc])
+            epochs_log.log([phase, epoch+1, epoch_loss, epoch_acc])
 
+        # save the model
         torch.save({'epoch': epoch + 1,
                     'arch': args.arch,
                     'state_dict': model.state_dict(),

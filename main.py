@@ -20,7 +20,7 @@ from torch.utils.data.dataloader import default_collate
 import torchvision.transforms as transforms
 
 import preprocessing
-from datasets.VidDataLoader import VidDataset
+from VidDataLoader import VidDataset
 
 import clustering
 import models
@@ -155,7 +155,7 @@ def main(args):
                                              num_workers=args.workers,
                                              pin_memory=True)
 
-    # calculate batch size sum (better clean-up data with data-cleaner.py)
+    # calculate batch size sum (better clean-up data with clean_data.py)
     dataset_len = 0
     if not args.dataset_pkl:
         dataloader.collate_fn = my_collate
