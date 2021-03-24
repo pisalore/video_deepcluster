@@ -3,6 +3,8 @@ import datetime
 import pickle
 import logging
 from xml.dom import minidom
+from PIL import Image
+
 
 import torchvision.transforms as transforms
 
@@ -44,7 +46,7 @@ def parse_annotation(ann):
     """
     try:
         xml = minidom.parse(ann)
-        crop_coord = {'xminx': int(xml.getElementsByTagName('xmin')[0].firstChild.data),
+        crop_coord = {'xmin': int(xml.getElementsByTagName('xmin')[0].firstChild.data),
                       'xmax': int(xml.getElementsByTagName('xmax')[0].firstChild.data),
                       'ymin': int(xml.getElementsByTagName('ymin')[0].firstChild.data),
                       'ymax': int(xml.getElementsByTagName('ymax')[0].firstChild.data)
@@ -85,6 +87,9 @@ def main(args):
             not_annotated_imgs_idx.append(idx)
             logging.info("Removed " + img[0] + "\n")
         else:
+            img_width = img_crop_coords['xmax'] - img_crop_coords['xmin']
+            im = Image.open(img[0])
+            im.crop((img_crop_coords['xmin'], img_crop_coords['ymin'], img_crop_coords['xmin'] + img_width, img_crop_coords['ymax'])).save(img[0])
             dataset_labels[img[0]] = labels[img_label_name]
             dataset_crop_coords[img[0]] = img_crop_coords
         if not (idx + 1) % 1000:
