@@ -6,8 +6,8 @@
 #
 #!/bin/bash
 DATA_TYPE="train"
-DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/${DATA_TYPE}/"
-ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/${DATA_TYPE}/"
+DATA_DIR="/thecube/students/${USER}/ILSVRC2017_VID/ILSVRC/Data/VID/${DATA_TYPE}/"
+ANN_DIR="/thecube/students/${USER}/ILSVRC2017_VID/ILSVRC/Annotations/VID/${DATA_TYPE}/"
 LBL_TXT="/home/${USER}/video_deepcluster/map_vid.txt"
 EXP="/thecube/students/${USER}/"
 
