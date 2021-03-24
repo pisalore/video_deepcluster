@@ -40,7 +40,7 @@ class VidDatasetLight(ImageFolder):
             crop_coords = None
 
         sample = {'image': image,
-                  'name': Path(self.imgs[idx][0]),
+                  'name': self.imgs[idx][0],
                   'label': label,  # classes are from 0 to 29
                   'crop_coords' : crop_coords
                   }
