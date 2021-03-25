@@ -41,8 +41,8 @@ class VidDatasetLight(ImageFolder):
 
         sample = {'image': image,
                   'name': self.imgs[idx][0],
-                  'label': label,  # classes are from 0 to 29
-                  'crop_coords' : crop_coords
+                  'label': int(label['code']) - 1,  # classes are from 0 to 29
+                  'crop_coords': crop_coords
                   }
 
         if self.transform:

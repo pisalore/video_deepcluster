@@ -169,7 +169,7 @@ def train(data_loaders, model, crit, opt):
 
             for i, sample in enumerate(data_loaders[phase]):
                 input_var = torch.autograd.Variable(sample['image'].cuda())
-                labels = torch.as_tensor(np.array(sample['label']['code'], dtype='int_'))
+                labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
                 labels = labels.type(torch.LongTensor).cuda()
 
                 with torch.set_grad_enabled(phase == 'train'):
