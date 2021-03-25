@@ -114,8 +114,8 @@ def main(args):
           "Validation set dimension: {1}\n".format(len(train_dataset.imgs), len(val_dataset.imgs)))
 
     # Dataloaders
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True, num_workers=args.workers)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch, shuffle=True, num_workers=args.workers)
 
     print('Training starts.')
     dataloaders = {'train': train_dataloader, 'val': val_dataloader}
