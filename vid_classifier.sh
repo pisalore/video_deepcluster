@@ -26,5 +26,5 @@ mkdir -p ${EXP}
 
 CUDA_VISIBLE_DEVICES=0 ${PYTHON}  vid_classifier.py --load_step ${STEP} --batch ${BATCH} --arch ${ARCH} \
 --lr ${LR} --wd ${WD} --train_dataset_pkl ${PKL_TRAIN} --val_dataset_pkl ${PKL_VAL} --model ${PRE_TRAINED_MODEL} --k ${K} --out_classes ${NUM_OUT_CLASSES} \
---sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
+--sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS} --exp ${EXP}
 #/miniconda/envs/vmr/bin/python
