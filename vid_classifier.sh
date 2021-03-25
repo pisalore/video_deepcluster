@@ -6,8 +6,8 @@
 #
 #!/bin/bash
 #TODO: paths reworking
-PKL_TRAIN="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
-PKL_VAL="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
+PKL_TRAIN="/thecube/students/${USER}/vid_dataset_train_2021.3.25_16_47_0.pkl"
+PKL_VAL="/thecube/students/${USER}/vid_dataset_val_2021.3.25_4_46_56.pkl"
 
 NUM_OUT_CLASSES=30
 
