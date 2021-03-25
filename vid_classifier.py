@@ -195,7 +195,7 @@ def train(data_loaders, model, crit, opt):
                     print('Epoch: [{0}][{1}/{2}]\n'
                           'Running loss:: {loss:.4f} \n'
                           'Running corrects: ({corrects:.4f}) \n'
-                          .format(epoch+1, i+1, len(data_loaders['train']), loss=(loss.item() * input_var.size(0)), corrects=(torch.sum(preds == labels.data))))
+                          .format(epoch+1, i+1, len(data_loaders[phase]), loss=(loss.item() * input_var.size(0)), corrects=(torch.sum(preds == labels.data))))
 
             epoch_loss = running_loss / len(data_loaders[phase].dataset)
             epoch_acc = running_corrects.double() / len(data_loaders[phase].dataset)
