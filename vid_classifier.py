@@ -153,8 +153,9 @@ def train(data_loaders, model, crit, opt):
 
     for epoch in range(args.start_epoch, args.epochs):
         losses = AverageMeter()
+        epoch_dict = {'train': [], 'val': []}
         print('\n')
-        print('Epoch {}/{}'.format(epoch+1, args.epochs))
+        print('Epoch {}/{}'.format(epoch + 1, args.epochs))
         print('-' * 10)
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -195,7 +196,8 @@ def train(data_loaders, model, crit, opt):
                     print('Epoch: [{0}][{1}/{2}]\n'
                           'Running loss:: {loss:.4f} \n'
                           'Running corrects: ({corrects:.4f}) \n'
-                          .format(epoch+1, i+1, len(data_loaders[phase]), loss=(loss.item() * input_var.size(0)), corrects=(torch.sum(preds == labels.data))))
+                          .format(epoch + 1, i + 1, len(data_loaders[phase]), loss=(loss.item() * input_var.size(0)),
+                                  corrects=(torch.sum(preds == labels.data))))
 
             epoch_loss = running_loss / len(data_loaders[phase].dataset)
             epoch_acc = running_corrects.double() / len(data_loaders[phase].dataset)
@@ -207,7 +209,9 @@ def train(data_loaders, model, crit, opt):
             if phase == 'val':
                 val_acc_history.append([epoch_loss, epoch_acc])
 
-            epochs_log.log([phase, epoch+1, epoch_loss, epoch_acc, running_loss, running_corrects])
+            epoch_dict[phase] = [epoch + 1, epoch_loss, epoch_acc.item(), running_loss, running_corrects.item()]
+
+        epochs_log.log(epoch_dict)
 
         # save the model
         torch.save({'epoch': epoch + 1,
