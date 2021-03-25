@@ -20,8 +20,8 @@ import models
 def parse_args():
     parser = argparse.ArgumentParser(description='Classifier for Vid Dataset')
 
-    parser.add_argument('--dataset_pkl', metavar='PKL', help='path to a serialized dataset.')
-    parser.add_argument('--labels_pkl', metavar='LABELS', help='path to serialized labels.')
+    parser.add_argument('--train_dataset_pkl', metavar='PKL_TRAIN', help='path to a serialized train dataset.')
+    parser.add_argument('--val_dataset_pkl', metavar='PKL_VAL', help='path to the serialized val dataset.')
     parser.add_argument('--model', metavar='PRETRAINED_MODEL', help='path to video deepcluster pretrained model.')
     parser.add_argument('--load_step', metavar='STEP', type=int, default=1,
                         help='step by which load images from Data folder. Default: 1 (each image will be loaded.')
@@ -46,10 +46,6 @@ def parse_args():
     parser.add_argument('--batch', default=256, type=int,
                         help='mini-batch size (default: 256)')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum (default: 0.9)')
-    parser.add_argument('--resume', default='', type=str, metavar='PATH',
-                        help='path to checkpoint (default: None)')
-    parser.add_argument('--checkpoints', type=int, default=25000,
-                        help='how many iterations between two checkpoints (default: 25000)')
     parser.add_argument('--seed', type=int, default=31, help='random seed (default: 31)')
     parser.add_argument('--exp', type=str, default='', help='path to exp folder')
     parser.add_argument('--verbose', action='store_true', help='chatty')
@@ -103,28 +99,16 @@ def main(args):
     # define loss function
     criterion = nn.CrossEntropyLoss().cuda()
 
-    # Labels: they have been added in a second moment, with another processing of ImageSets files inside VID dataset.
-    print('Start loading dataset...')
-    complete_dataset, val_dataset, labels = None, None, None
-    if args.labels_pkl:
-        labels = deserialize_obj(args.labels_pkl)
+    # Dataset: Get datasets from serialized object
+    train_dataset = deserialize_obj(args.train_dataset_pkl)
+    val_dataset = deserialize_obj(args.val_dataset_pkl)
 
-    # Dataset: Get dataset from serialized object
-    complete_dataset = deserialize_obj(args.dataset_pkl)
-    complete_dataset.vid_labels = labels
+    # Dataset subsampling
+    train_dataset.imgs = train_dataset.imgs[0::args.load_step]
+    train_dataset.samples = train_dataset.samples[0::args.load_step]
 
-    # Dataset manipulation and labels assignment (both for train and val)
-    train_dataset = deepcopy(complete_dataset)
-    train_dataset.imgs = complete_dataset.imgs[0::args.load_step]
-    train_dataset.samples = complete_dataset.samples[0::args.load_step]
-
-    # val dataset. Since there are not labels for the original one, training set is used, considering images which
-    # are not in training set.
-    val_dataset = deepcopy(complete_dataset)
-    remaining_imgs = list(set(complete_dataset.imgs) - set(train_dataset.imgs))
-    remaining_samples = list(set(complete_dataset.samples) - set(train_dataset.samples))
-    train_dataset.imgs = remaining_imgs
-    train_dataset.samples = remaining_samples
+    val_dataset.imgs = val_dataset.imgs[0::args.load_step]
+    val_dataset.samples = val_dataset.samples[0::args.load_step]
 
     print("Training set dimension: {0}\n"
           "Validation set dimension: {1}\n".format(len(train_dataset.imgs), len(val_dataset.imgs)))
@@ -135,8 +119,10 @@ def main(args):
 
     print('Training starts.')
     dataloaders = {'train': train_dataloader, 'val': val_dataloader}
+
     since = time.time()
     val_acc_history = train(dataloaders, model, criterion, optimizer)
+
     with open(os.path.join(args.exp, 'val_acc_history.pkl'), 'wb') as f:
         pickle.dump(val_acc_history, f)
     print('Elapsed time: {} '.format(time.time() - since))
@@ -183,7 +169,7 @@ def train(data_loaders, model, crit, opt):
 
             for i, sample in enumerate(data_loaders[phase]):
                 input_var = torch.autograd.Variable(sample['image'].cuda())
-                labels = torch.as_tensor(np.array(sample['label'], dtype='int_'))
+                labels = torch.as_tensor(np.array(sample['label']['code'], dtype='int_'))
                 labels = labels.type(torch.LongTensor).cuda()
 
                 with torch.set_grad_enabled(phase == 'train'):

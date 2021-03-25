@@ -5,8 +5,10 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-PKL="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
-LABELS="/thecube/students/${USER}/labels.pkl"
+#TODO: paths reworking
+PKL_TRAIN="/thecube/students/${USER}/vid_dataset_train_2021.3.25_16_47_0.pkl"
+PKL_VAL="/thecube/students/${USER}/vid_dataset_val_2021.3.25_4_46_56.pkl"
+
 NUM_OUT_CLASSES=30
 
 STEP=3
@@ -23,6 +25,6 @@ BATCH=256
 mkdir -p ${EXP}
 
 CUDA_VISIBLE_DEVICES=0 ${PYTHON}  vid_classifier.py --load_step ${STEP} --batch ${BATCH} --arch ${ARCH} \
---lr ${LR} --wd ${WD} --dataset_pkl ${PKL} --labels_pkl ${LABELS} --model ${PRE_TRAINED_MODEL} --k ${K} --out_classes ${NUM_OUT_CLASSES} \
+--lr ${LR} --wd ${WD} --train_dataset_pkl ${PKL_TRAIN} --val_dataset_pkl ${PKL_VAL} --model ${PRE_TRAINED_MODEL} --k ${K} --out_classes ${NUM_OUT_CLASSES} \
 --sobel --verbose --workers ${WORKERS} --epoch ${EPOCHS}
 #/miniconda/envs/vmr/bin/python
