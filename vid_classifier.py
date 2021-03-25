@@ -191,7 +191,7 @@ def train(data_loaders, model, crit, opt):
                 running_loss += loss.item() * input_var.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
-                if args.verbose:
+                if args.verbose and not i % 200:
                     print('Epoch: [{0}][{1}/{2}]\n'
                           'Running loss:: {loss:.4f} \n'
                           'Running corrects: ({corrects:.4f}) \n'
