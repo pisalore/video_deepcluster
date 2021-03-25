@@ -140,6 +140,7 @@ def train(data_loaders, model, crit, opt):
     """
     # logger
     epochs_log = Logger(os.path.join(args.exp, 'epochs'))
+    epochs_log.log(os.path.join(args.exp, 'test'))
     val_acc_history = []
 
     best_acc = 0.0
@@ -207,7 +208,7 @@ def train(data_loaders, model, crit, opt):
             if phase == 'val':
                 val_acc_history.append([epoch_loss, epoch_acc])
 
-            epochs_log.log([phase, epoch+1, epoch_loss, epoch_acc])
+            epochs_log.log([phase, epoch+1, epoch_loss, epoch_acc, running_loss, running_corrects])
 
         # save the model
         torch.save({'epoch': epoch + 1,
