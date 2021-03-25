@@ -140,7 +140,6 @@ def train(data_loaders, model, crit, opt):
     """
     # logger
     epochs_log = Logger(os.path.join(args.exp, 'epochs'))
-    epochs_log.log(os.path.join(args.exp, 'test'))
     val_acc_history = []
 
     best_acc = 0.0
