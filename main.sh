@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-DATA_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
+DATA_DIR="/thecube/students/${USER}/ILSVRC2017_VID/ILSVRC/Data/VID/train/"
 ANN_DIR="/mnt/ILSVRC2017_VID/ILSVRC/Annotations/VID/train/"
 PKL="/thecube/students/${USER}/vid_dataset_2021.3.10_18_0_46.pkl"
 LABELS="/thecube/students/${USER}/labels.pkl"

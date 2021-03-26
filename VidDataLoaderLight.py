@@ -31,7 +31,7 @@ class VidDatasetLight(ImageFolder):
         img_name = self.imgs[idx][0]
         image = torch.from_numpy(io.imread(img_name).astype('float32') / 255)
         if self.vid_labels is not None:
-            label = self.vid_labels[img_name]
+            label = int(self.vid_labels[img_name]['code']) - 1
         else:
             label = -1
         if self.crop_coords is not None:
@@ -41,7 +41,7 @@ class VidDatasetLight(ImageFolder):
 
         sample = {'image': image,
                   'name': self.imgs[idx][0],
-                  'label': int(label['code']) - 1,  # classes are from 0 to 29
+                  'label': label,  # classes are from 0 to 29
                   'crop_coords': crop_coords
                   }
 
