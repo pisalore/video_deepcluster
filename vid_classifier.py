@@ -2,7 +2,6 @@ import argparse
 import os
 import pickle
 import time
-from copy import deepcopy
 
 import torch
 import torch.nn as nn
@@ -66,12 +65,16 @@ def main(args):
     if args.verbose:
         print('Architecture: {}'.format(args.arch))
     model = models.__dict__[args.arch](sobel=args.sobel)
-    # top layer has a (4096, k) shape, where k is the number of cluster set in video deepcluster routine. It must be inserted in order
-    # to correctly load model
-    model.top_layer = nn.Linear(4096, args.k)
-    model.features = torch.nn.DataParallel(model.features)
-    checkpoint = torch.load(args.model)
-    model.load_state_dict(checkpoint['state_dict'])
+
+    if args.model:
+        # top layer has a (4096, k) shape, where k is the number of cluster set in video deepcluster routine. It must be inserted in order
+        # to correctly load model
+        model.top_layer = nn.Linear(4096, args.k)
+        model.features = torch.nn.DataParallel(model.features)
+        checkpoint = torch.load(args.model)
+        model.load_state_dict(checkpoint['state_dict'])
+
+    # if the model is not present, from scratch
     fd = int(model.top_layer.weight.size()[1])
     model.cuda()
     cudnn.benchmark = True
@@ -84,6 +87,7 @@ def main(args):
     model.top_layer.weight.data.normal_(0, 0.01)
     model.top_layer.bias.data.zero_()
     model.top_layer.cuda()
+
 
     print('CNN builded.')
 
