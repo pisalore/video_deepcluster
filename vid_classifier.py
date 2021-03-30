@@ -38,8 +38,8 @@ def parse_args():
                         help='weight decay pow (default: -5)')
     parser.add_argument('--workers', default=4, type=int,
                         help='number of data loading workers (default: 4)')
-    parser.add_argument('--epochs', type=int, default=200,
-                        help='number of total epochs to run (default: 200)')
+    parser.add_argument('--epochs300', type=int, default=200,
+                        help='number of total epochs300 to run (default: 200)')
     parser.add_argument('--start_epoch', default=0, type=int,
                         help='manual epoch number (useful on restarts) (default: 0)')
     parser.add_argument('--batch', default=256, type=int,
@@ -143,7 +143,7 @@ def train(data_loaders, model, crit, opt):
             epoch (int)
     """
     # logger
-    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
+    epochs_log = Logger(os.path.join(args.exp, 'epochs300'))
     val_acc_history = []
 
     best_acc = 0.0

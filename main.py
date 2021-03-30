@@ -48,12 +48,12 @@ def parse_args():
     parser.add_argument('--wd', default=-5, type=float,
                         help='weight decay pow (default: -5)')
     parser.add_argument('--reassign', type=float, default=1.,
-                        help="""how many epochs of training between two consecutive
+                        help="""how many epochs300 of training between two consecutive
                         reassignments of clusters (default: 1)""")
     parser.add_argument('--workers', default=4, type=int,
                         help='number of data loading workers (default: 4)')
-    parser.add_argument('--epochs', type=int, default=200,
-                        help='number of total epochs to run (default: 200)')
+    parser.add_argument('--epochs300', type=int, default=200,
+                        help='number of total epochs300 to run (default: 200)')
     parser.add_argument('--start_epoch', default=0, type=int,
                         help='manual epoch number (useful on restarts) (default: 0)')
     parser.add_argument('--batch', default=256, type=int,
@@ -128,7 +128,7 @@ def main(args):
 
     # creating cluster assignments log
     cluster_log = Logger(os.path.join(args.exp, 'clusters'))
-    epochs_log = Logger(os.path.join(args.exp, 'epochs'))
+    epochs_log = Logger(os.path.join(args.exp, 'epochs300'))
 
     # Loading and preprocessing of data: custom Rescale and ToTensor transformations for VidDataset.
     # VidDataset has a box_frame, which is a pandas Dataframe containing images path an their bb coordinates.
