@@ -14536,7 +14536,7 @@ $</p>
 <p>$\begin{align}
 \min_{\theta, W} \frac{1}{N} \sum_{n=1}^N \ell\left(g_W\left( f_\theta(x_n) \right), y_n\right)
 \end{align} $</p>
-<p>Where $ \theta $ represents the mapping parameters and $ W $ are the classifier parameters,$ g_W$ is the classifier
+<p>Where $ \theta $ represents the mapping parameters and $ W $ are the classifier parameters, $ g_W$ is the classifier
 and $\ell$ is the multinomial logistic loss function.</p>
 
 </div>
@@ -14609,7 +14609,10 @@ With Python these operations are straightforward.</p>
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1>The process: deepcluster training</h1><p>We are at our starting point. The framework used for this project is PyTorch.</p>
 <ul>
-<li><p>Deepcluster was trained for 100 epochs, using a batch size of 256 and LR = 0.05.</p>
+<li><p>Deepcluster was trained for 100 epochs with AlexNet architecture, batch normalization and Sobel filtering, batch size
+of 256 and LR = 0.05.</p>
+</li>
+<li><p>Data augmentation is used: random horizontal flips and crops of random size.</p>
 </li>
 <li><p>For clustering, k-means is used. For this reason, $k$ is an important parameter to be chosen; consequently, it is also
 important to determine if a choice is better than another.</p>
@@ -14719,6 +14722,17 @@ as a starting point of a fine-tuned AlexNet in oder to classify.</p>
 
 </div>
 </div></div></section></section><section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1> Bibliography </h1><ul>
+<li>Deep Learning with Python, François Chollet, Manning, 2017</li>
+<li>Introduction to Machine Learning with Python, Andreas C. Muller, Sarah Guido, O'Reilly, 2016</li>
+<li>Caron Mathilde, Bojanowski Piotr, Joulin Armand, Douze Matthijs, 2019. Deep Clustering for Unsupervised Learning
+of Visual Features</li>
+</ul>
+
+</div>
+</div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 style="text-align:center">THANKS FOR YOUR ATTENTION !!!</h1>
