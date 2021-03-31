@@ -14422,7 +14422,7 @@ Unsupervised Learning with Deepcluster on VID Dataset
 </div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1>Introduction</h1><p>AI and Machine Learning algorithms are increasingly pervasive in daily life, with the result we need ever larger
+<h1>Introduction</h1><p>AI and Machine Learning are increasingly pervasive in daily life, with the result we need ever larger
 dataset and ever more annotated data for our supervised learning algorithms. For this reason, unsupervised learning is
 becoming important, in order to obtain useful information from input data to be maybe used later in a supervised learning
 process.</p>
@@ -14431,8 +14431,8 @@ process.</p>
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3> Unsupervised Learning Challanges </h3><p>Obviously, since our algorithm does not know how the output should be, we have to evaluate if the algorithm has learnt
-something useful to our purpose. For example, using clustering algorithms, it is crucial to understand if data are
+<h3> Unsupervised Learning Challanges </h3><p>Obviously, since our algorithm does not know how the output should be, we have to evaluate if the procedure has learnt
+something useful to our purpose. For example, using clustering algorithms, it is crucial to understand if examples are
 collected in a desired way for further inference on data.</p>
 <p><br>
 <img style="display: block;
@@ -14453,7 +14453,7 @@ collected in a desired way for further inference on data.</p>
 <ul>
 <li>Well tested pretrained CNNs are available, like those
 obtained starting from famous ImageNet dataset, a fully supervised dataset consisting
-in one million of images distributed over 1000 categories.</li>
+in one million images distributed over 1000 categories.</li>
 </ul>
 
 </div>
@@ -14495,7 +14495,7 @@ and output for weights optimization).</p>
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3> How does deepclustering works? </h3><p><br>
+<h3> How does deepclustering work? </h3><p><br>
 <img style="display: block;
   margin-left: auto;
   margin-right: auto;
@@ -14543,10 +14543,8 @@ and $\ell$ is the multinomial logistic loss function.</p>
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3>Here we are!</h3><p>Once out deepcluster models is trained, we could use it as a "classic" classifier, maybe using fine tuning or
-transfer learning techniques.</p>
-<p>In this way, exploiting the pretraining with deepcluster, hopefully we could be able to generalize and automatically
-annotate our dataset of images.</p>
+<h3>Here we are!</h3><p>Once our deepcluster models are trained, we could use it as a "classic" classifier, maybe using fine tuning or transfer learning techniques.</p>
+<p>In this way, exploiting the pretraining with deepcluster, hopefully we could be able to generalize and automatically annotate our dataset of images.</p>
 <p><br>
 <img style="display: block;
   margin-left: auto;
@@ -14574,12 +14572,11 @@ indicating object crop coordinates of the specified frame.</p>
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3> Data preprocessing (I)</h3><p>First, it is important to know our data and make a good preprocessing.</p>
+<h3> Data preprocessing (I)</h3><p>First, we must know our data and make a good preprocessing.</p>
 <ul>
 <li><p>As we can imagine, not all images where correctly annotated, resulting in the need to make dataset consistent.</p>
 </li>
-<li><p>Another aspects involve performance: how much can an on demand crop image cost when loading data for feature computing and
-clustering using deepcluster? Does it make sense to perform the same operation on same images for many epochs?</p>
+<li><p>Another aspect involve performance: how much can an on demand crop image cost when loading data for feature computing and clustering using deepcluster? Does it make sense to perform the same operation on same images for many epochs?</p>
 </li>
 </ul>
 
@@ -14626,7 +14623,7 @@ two different assignments:</p>
 \mathrm{NMI}(A;B)=\frac{\mathrm{I}(A;B)}{\sqrt{\mathrm{H}(A) \mathrm{H}(B)}}
 \end{align}
 $</p>
-<p>The more NMI is closer to 1, the more an assignment A is deterministically predictable from an assignment B.</p>
+<p>The more NMI is closer to 1, the more an assignment B is deterministically predictable from an assignment A.</p>
 
 </div>
 </div></section><section>
@@ -14692,7 +14689,7 @@ useful for the purpose of build an images classifier.</p>
 due to the fact that images are video frames: features provides information on very similar data.</p>
 </li>
 <li><p>However, overfitting occurs in different moments with respect to each model. The one pretrained with 300-means performs
-better than the others; in general it seems that better the clustering phase, better the supervised training.</p>
+better than the others; in general better the clustering phase, better the supervised training.</p>
 </li>
 <li><p>The previous consideration is supported by the validation accuracy plot.</p>
 </li>
@@ -14714,7 +14711,7 @@ as a starting point of a fine-tuned AlexNet in oder to classify.</p>
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>Some future developments could be:</p>
 <ul>
-<li>Use feature extraction instead fine tuning (using the last two convolutional layers if using AlexNet)</li>
+<li>Use feature extraction instead fine tuning (with the last two convolutional layers if using AlexNet)</li>
 <li>Use other architectures (for example, VGG16)</li>
 <li>Use another dataset and varying the number of images during che features computing / clustering</li>
 <li>Exploit video information (for VID dataset)</li>
